@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
+    "sandbox": "export EXPO_PACKAGER_PROXY_URL=https://${CSB_SANDBOX_ID}-8080.csb.app && expo start --port 8080",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web"
   },
   "dependencies": {
+
     "@gluestack-style/react": "^1.0.5",
     "@gluestack-ui/themed": "^1.0.4",
     "expo": "~49.0.13",
@@ -24,9 +26,15 @@
     "expo-secure-store": "~12.3.1",
     "expo-image-picker": "~14.3.2",
     "expo-location": "~16.1.0"
+
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "http-proxy-middleware": "^0.19.0",
+    "qs": "^6.5.2",
+    "xdl": "^60.0.12"
   },
   "private": true
 }
