@@ -15,16 +15,49 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Want to access your microphone because...",
+        "NSPhotoLibraryUsageDescription": "Want to access your photo library because...",
+        "NSCameraUsageDescription": "Want to use your camera because...",
+        "NSLocationAlwaysUsageDescription": "We need to display your location on the home screen."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Please iOS let me access the camera roll.",
+          "cameraPermission": "Please iOS let me access the camera."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "5cfaecf7-5fbb-458f-9128-f0e04b40a98b"
+      }
     }
   }
 }
