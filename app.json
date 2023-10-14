@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "React Native with Expo on CodeSandbox",
-    "slug": "react-native-codesandbox",
+    "name": "Giftr",
+    "slug": "Giftr",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -52,11 +54,6 @@
           "cameraPermission": "Please iOS let me access the camera."
         }
       ]
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "5cfaecf7-5fbb-458f-9128-f0e04b40a98b"
-      }
-    }
+    ]
   }
 }
