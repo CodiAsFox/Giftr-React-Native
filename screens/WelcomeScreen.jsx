@@ -1,50 +1,76 @@
 import {
   Box,
   Button,
-  Text,
   ButtonText,
   ButtonIcon,
   Heading,
   Image,
-  HStack,
-  AddIcon,
-  tack,
-  GluestackUIProvider,
+  SunIcon,
+  MoonIcon,
 } from "@gluestack-ui/themed";
+import { FontAwesome5 } from "@expo/vector-icons";
 import React from "react";
 import { BlurView } from "expo-blur";
 import { useColorMode } from "@gluestack-ui/themed";
 import AnimationPlayer from "../components/AnimationPlayer";
-import { SafeAreaView, StyleSheet } from "react-native";
-
-export default function HomeScreen({ navigation }) {
+import { SafeAreaView, StyleSheet, ImageBackground } from "react-native";
+import { storeData, getData } from "../utils/Storage";
+export default function HomeScreen({ navigation, setTheme }) {
   const colorMode = useColorMode();
   let welcomeAnimation = require("../assets/animations/welcome.json");
+
+  switch (colorMode) {
+    case "dark":
+      welcomeBg = require("../assets/WelcomeDark.png");
+      toggleLink = "Light Mode ";
+      toggleIcon = SunIcon;
+      break;
+    default:
+      welcomeBg = require("../assets/WelcomeLight.png");
+      toggleLink = "Dark Mode ";
+      toggleIcon = MoonIcon;
+      break;
+  }
   return (
     <SafeAreaView style={styles.container}>
-      <Image
+      <ImageBackground
+        source={welcomeBg}
+        resizeMode="cover"
         style={styles.background}
-        contentFit="cover"
-        source={require("../assets/background.jpg")}
-      />
-      <Box flex={1} justifyContent="center" alignItems="center">
-        <BlurView intensity={30} tint="dark" style={styles.blurContainer}>
-          <Heading>Welcome to Giftr</Heading>
-          <AnimationPlayer animation={welcomeAnimation} loop={false} />
+      >
+        <Box style={styles.welcomeMessage}>
+          <BlurView
+            intensity={90}
+            tint={colorMode}
+            style={styles.blurContainer}
+          >
+            <Heading style={styles.Heading}>Welcome to Giftr</Heading>
+            <AnimationPlayer animation={welcomeAnimation} loop={false} />
+            <Button
+              onPress={() => {
+                setTheme(colorMode === "dark" ? "light" : "dark");
+              }}
+              size="xs"
+              variant="outline"
+              action="secondary"
+            >
+              <ButtonText>{toggleLink}</ButtonText>
+              <ButtonIcon as={toggleIcon} />
+            </Button>
+          </BlurView>
           <Button
             onPress={() => navigation.navigate("Home")}
             padding={2}
             size="lg"
-            variant="solid"
-            action="positive"
+            action="link"
             borderRadius={2}
-            style={{}}
+            style={styles.buttonWrapper}
           >
-            <ButtonText color="white">Go to Home</ButtonText>
-            <ButtonIcon as={AddIcon} />
+            <ButtonText color="white">Start gifting </ButtonText>
+            <FontAwesome5 name="gifts" size={17} color="white" />
           </Button>
-        </BlurView>
-      </Box>
+        </Box>
+      </ImageBackground>
     </SafeAreaView>
   );
 }
@@ -52,25 +78,39 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    // justifyContent: "center",
+    // alignContent: "center",
   },
   blurContainer: {
-    flex: 1,
-    padding: 20,
+    // flex: 1,
+    padding: 40,
+    paddingBottom: 35,
     margin: 16,
     textAlign: "center",
     justifyContent: "center",
+    alignItems: "center",
     overflow: "hidden",
     borderRadius: 20,
   },
+  Heading: {
+    fontSize: 30,
+  },
   buttonWrapper: {
     flex: 1,
-    width: "85%",
+    width: "75%",
     justifyContent: "center",
     alignItems: "center",
     flexGrow: 1,
     alignSelf: "center",
     position: "absolute",
-    bottom: 55,
+    bottom: 45,
+  },
+  welcomeMessage: {
+    flex: 1,
+    height: 50,
+    alignSelf: "center",
+    justifyContent: "center",
+    textAlign: "center",
   },
   continueButtonBtn: {
     width: "100%",
@@ -101,12 +141,11 @@ const styles = StyleSheet.create({
   },
   background: {
     flex: 1,
+    justifyContent: "center",
+    position: "absolute",
     top: 0,
     bottom: 0,
-    flexWrap: "wrap",
     width: "100%",
-    height: "150%",
-    ...StyleSheet.absoluteFill,
   },
   title: {
     flex: 1,
@@ -114,7 +153,7 @@ const styles = StyleSheet.create({
     letterSpacing: 2.0,
     flexShrink: 1,
     lineHeight: 55,
-    fontWeight: "700",
+    fontWeight: 700,
     height: 60,
     overflow: "hidden",
   },
