@@ -4,6 +4,7 @@ import {
   ButtonText,
   ButtonIcon,
   Heading,
+  Text,
   View,
   Image,
   SunIcon,
@@ -16,8 +17,6 @@ import { useColorMode } from "@gluestack-ui/themed";
 import AnimationPlayer from "../components/AnimationPlayer";
 import { ImageBackground, SafeAreaView, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
-import Settings from "../components/Settings";
 
 export default function HomeScreen({ navigation, setTheme }) {
   const colorMode = useColorMode();
@@ -45,10 +44,29 @@ export default function HomeScreen({ navigation, setTheme }) {
         />
         <Heading style={styles.bannerText}>My List</Heading>
       </View>
-      <Button size="xs" variant="outline" action="secondary">
-        <Ionicons name="ios-settings" size={24} color="white" />
-      </Button>
-      <Settings />
+      <View>
+        <Box style={styles.emptyBody}>
+          <Heading style>No people saved.</Heading>
+          <Text style={{ marginBottom: 20 }}>Add a person to get started.</Text>
+          <AnimationPlayer
+            animation={require("../assets/animations/SadFox.json")}
+            autoPlay={true}
+            loop={false}
+          />
+          <Button
+            onPress={() => {
+              navigation.navigate("AddPerson");
+            }}
+            size="xs"
+            variant="outline"
+            action="secondary"
+            style={styles.button}
+          >
+            <ButtonText>Add Person </ButtonText>
+            <ButtonIcon as={Ionicons} name="ios-person-add" />
+          </Button>
+        </Box>
+      </View>
     </SafeAreaView>
   );
 }
@@ -58,9 +76,14 @@ const styles = StyleSheet.create({
     flex: 1,
     position: "relative",
   },
+  emptyBody: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
   banner: {
-    position: "absolute",
-    top: 0,
+    // position: "absolute",
+    top: -35,
     left: 0,
     width: "100%",
     height: 200,
@@ -72,8 +95,9 @@ const styles = StyleSheet.create({
   },
   bannerText: {
     fontSize: 30,
-    paddingTop: 15,
-    // position: "absolute",
+    // paddingTop: 15,
+    position: "absolute",
+    // top: ,
     // bottom: 0,
     // width: "100%",
     // padding: 20,
