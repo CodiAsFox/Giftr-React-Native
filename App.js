@@ -11,11 +11,11 @@ import {
   SunIcon,
   MoonIcon,
 } from "@gluestack-ui/themed";
-import React, { useState, useEffect } from "react";
+import { ThemeProvider, ThemeContext } from "./Utils/ThemeProvider";
+import React, { useState, useEffect, useContext } from "react";
 import { config } from "./config/gluestack-ui.config";
-import { StatusBar, StyleSheet } from "react-native";
-import WelcomeScreen from "./screens/WelcomeScreen";
-import HomeScreen from "./screens/HomeScreen";
+import { StatusBar, StyleSheet, Alert } from "react-native";
+import WelcomeScreen from "./Screens/WelcomeScreen";
 import {
   NavigationContainer,
   useNavigation,
@@ -23,20 +23,23 @@ import {
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { storeData, getData } from "./utils/Storage";
+import { storeData, getData } from "./Utils/Storage";
 import { Ionicons } from "@expo/vector-icons";
-import Settings from "./components/Settings";
+import Settings from "./Components/Settings";
 import { BlurView } from "expo-blur";
 
-import AddPersonScreen from "./screens/AddPersonScreen";
+import { DataProvider } from "./Utils/DataProvider";
+import PeopleScreen from "./Screens/PeopleScreen";
+import IdeaScreen from "./Screens/IdeaScreen";
+import AddIdeaScreen from "./Screens/Forms/AddIdeaScreen";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+import AddPersonScreen from "./Screens/Forms/AddPersonScreen";
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   const [colorMode, setTheme] = useState("dark");
-
-  const navigation = React.useContext(NavigationContext);
-
-  console.log(navigation);
 
   useEffect(() => {
     getData("ui_theme").then((value) => {
@@ -59,38 +62,139 @@ export default function App() {
     storeData("ui_theme", colorMode);
   }, [colorMode]);
 
-  const contentStyle = {
-    backgroundColor: colorMode === "light" ? "white" : "black",
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <GluestackUIProvider colorMode={colorMode} config={config}>
+        <ThemeProvider>
+          <DataProvider>
+            <SafeAreaProvider>
+              <AppNavigation setTheme={setTheme} />
+            </SafeAreaProvider>
+          </DataProvider>
+        </ThemeProvider>
+      </GluestackUIProvider>
+    </GestureHandlerRootView>
+  );
+}
+function AppNavigation({ setTheme }) {
+  const { bodyStyle, headerStyle, textColour } = useContext(ThemeContext);
+
+  const AddPerson = () => {
+    const navigation = useNavigation();
+    return (
+      <Button
+        onPress={() => {
+          navigation.navigate("AddPersonScreen");
+        }}
+        size="md"
+        variant="link"
+        action="secondary"
+      >
+        <ButtonIcon as={Ionicons} name="ios-person-add" />
+      </Button>
+    );
   };
 
-  let textColour = colorMode === "light" ? "#8a2419" : "#e0c089";
-
-  let AddPerson = () => {
+  const Cancel = () => {
     const navigation = useNavigation();
-    console.log(navigation);
     return (
-      <BlurView intensity={100} tint={colorMode} style={styles.blurContainer}>
-        <Button
-          onPress={() => {
-            navigation.navigate("AddPerson");
-          }}
-          size="xs"
-          variant="outline"
-          action="secondary"
-        >
-          <ButtonText color={textColour}>Add Person </ButtonText>
-          <ButtonIcon as={Ionicons} name="ios-person-add" />
-        </Button>
-      </BlurView>
+      <Button
+        onPress={() => {
+          Alert.alert(
+            "Discard changes",
+            "If you leave now, your changes will be lost.",
+            [
+              {
+                text: "Exit",
+                onPress: () => {
+                  navigation.goBack();
+                },
+                style: "destructive",
+              },
+              {
+                text: "Keep Editing",
+                style: "confirm",
+              },
+            ]
+          );
+        }}
+        size="md"
+        variant="link"
+        action="secondary"
+      >
+        <ButtonText show color={textColour}>
+          Cancel
+        </ButtonText>
+      </Button>
+    );
+  };
+
+  const Back = () => {
+    const navigation = useNavigation();
+    return (
+      <Button
+        onPress={() => {
+          navigation.goBack();
+        }}
+        size="xs"
+        variant="link"
+        action="secondary"
+      >
+        <ButtonIcon as={Ionicons} name="arrow-back-sharp" size={25} />
+        {/* <ButtonText show color={textColour}>Back </ButtonText> */}
+      </Button>
     );
   };
 
   return (
-    <GluestackUIProvider colorMode={colorMode} config={config}>
-      <SafeAreaProvider>
-        <NavigationContainer>
-          <Stack.Navigator>
-            <Stack.Screen
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="PeopleScreen"
+          component={PeopleScreen}
+          options={{
+            title: "Home",
+            contentStyle: bodyStyle,
+            headerStyle: headerStyle,
+            headerTintColor: textColour,
+            headerRight: (props) => {
+              return <AddPerson />;
+            },
+            headerLeft: () => <Settings setTheme={setTheme} />,
+          }}
+        />
+        <Stack.Screen
+          name="AddPersonScreen"
+          component={AddPersonScreen}
+          options={{
+            title: "Add Person",
+            contentStyle: bodyStyle,
+            headerStyle: headerStyle,
+            headerTintColor: textColour,
+            headerLeft: () => <Cancel />,
+          }}
+        />
+        <Stack.Screen
+          name="IdeaScreen"
+          component={IdeaScreen}
+          options={{
+            title: "Ideas",
+            contentStyle: bodyStyle,
+            headerStyle: headerStyle,
+            headerTintColor: textColour,
+          }}
+        />
+        <Stack.Screen
+          name="AddIdeaScreen"
+          component={AddIdeaScreen}
+          options={{
+            title: "Add Idea",
+            contentStyle: bodyStyle,
+            headerStyle: headerStyle,
+            headerTintColor: textColour,
+          }}
+        />
+        {/* <Stack.Screen
               name="Welcome"
               options={{
                 headerShown: false,
@@ -98,48 +202,44 @@ export default function App() {
               }}
             >
               {(props) => <WelcomeScreen {...props} setTheme={setTheme} />}
-            </Stack.Screen>
-            <Stack.Screen
-              name="Home"
-              options={{
-                headerShown: true,
-                title: "",
-                contentStyle: contentStyle,
-                headerStyle: {
-                  backgroundColor: "transparent",
-                },
-                headerTintColor: textColour,
-                headerRight: (props) => {
-                  console.log(props, this);
-                  return <AddPerson />;
-                },
-                headerLeft: () => <Settings setTheme={setTheme} />,
-              }}
-            >
-              {(props) => <HomeScreen {...props} setTheme={setTheme} />}
-            </Stack.Screen>
-            <Stack.Screen
-              name="AddPerson"
-              options={{
-                headerShown: true,
-                title: "Add Person",
-                contentStyle: contentStyle,
-                headerStyle: {
-                  backgroundColor: "transparent",
-                },
-                headerTintColor: textColour,
-                headerRight: (props) => {
-                  console.log(props);
-                  // return <AddPerson />;
-                },
-              }}
-            >
-              {(props) => <AddPersonScreen {...props} setTheme={setTheme} />}
-            </Stack.Screen>
-          </Stack.Navigator>
-        </NavigationContainer>
-      </SafeAreaProvider>
-    </GluestackUIProvider>
+            </Stack.Screen> */}
+        {/* <Stack.Screen
+                  name="Home"
+                  options={{
+                    headerShown: true,
+                    title: "My List",
+                    contentStyle: contentStyle,
+                    headerStyle: headerStyle,
+                    headerTintColor: textColour,
+                    headerRight: (props) => {
+                      console.log(props, this);
+                      return <AddPerson />;
+                    },
+                    headerLeft: () => <Settings setTheme={setTheme} />,
+                  }}
+                >
+                  {(props) => <HomeScreen {...props} setTheme={setTheme} />}
+                </Stack.Screen>
+                <Stack.Screen
+                  name="AddPerson"
+                  options={{
+                    headerShown: true,
+                    title: "Add Person",
+                    contentStyle: contentStyle,
+                    headerStyle: headerStyle,
+                    headerTintColor: textColour,
+                    headerRight: (props) => {
+                      console.log(props);
+                      // return <AddPerson />;
+                    },
+                  }}
+                >
+                  {(props) => (
+                    <AddPersonScreen {...props} setTheme={setTheme} />
+                  )}
+                </Stack.Screen> */}
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 const styles = StyleSheet.create({

@@ -18,7 +18,7 @@ import { SafeAreaView, StyleSheet, ImageBackground } from "react-native";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 import { useColorMode } from "@gluestack-ui/themed";
-import { storeData, getData } from "../utils/Storage";
+import { storeData, getData } from "../Utils/Storage";
 export default function Settings({ setTheme }) {
   const colorMode = useColorMode();
   const [showActionsheet, setShowActionsheet] = React.useState(false);
@@ -39,16 +39,9 @@ export default function Settings({ setTheme }) {
 
   return (
     <Box style={styles.container}>
-      <BlurView intensity={50} tint={colorMode} style={styles.blurContainer}>
-        <Button
-          onPress={handleClose}
-          size="xs"
-          variant="outline"
-          action="secondary"
-        >
-          <Ionicons name="ios-settings" size={18} color={color} />
-        </Button>
-      </BlurView>
+      <Button onPress={handleClose} size="xs" variant="link" action="secondary">
+        <Ionicons name="ios-settings" size={18} color={color} />
+      </Button>
       <Actionsheet isOpen={showActionsheet} onClose={handleClose} zIndex={999}>
         <ActionsheetBackdrop />
         <ActionsheetContent h="$75" zIndex={999}>

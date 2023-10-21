@@ -12,25 +12,16 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import React from "react";
 import { BlurView } from "expo-blur";
 import { useColorMode } from "@gluestack-ui/themed";
-import AnimationPlayer from "../components/AnimationPlayer";
+import AnimationPlayer from "../Components/AnimationPlayer";
 import { SafeAreaView, StyleSheet, ImageBackground } from "react-native";
-import { storeData, getData } from "../utils/Storage";
+import { storeData, getData } from "../Utils/Storage";
+import { Assets, Animations } from "../assets/Assets";
+import { ThemeContext } from "../Utils/ThemeProvider";
+
 export default function HomeScreen({ navigation, setTheme }) {
   const colorMode = useColorMode();
-  let welcomeAnimation = require("../assets/animations/welcome.json");
+  const { welcomeBg, toggleLink, toggleIcon } = useContext(ThemeContext);
 
-  switch (colorMode) {
-    case "dark":
-      welcomeBg = require("../assets/WelcomeDark.png");
-      toggleLink = "Light Mode ";
-      toggleIcon = SunIcon;
-      break;
-    default:
-      welcomeBg = require("../assets/WelcomeLight.png");
-      toggleLink = "Dark Mode ";
-      toggleIcon = MoonIcon;
-      break;
-  }
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground
@@ -45,7 +36,7 @@ export default function HomeScreen({ navigation, setTheme }) {
             style={styles.blurContainer}
           >
             <Heading style={styles.Heading}>Welcome to Giftr</Heading>
-            <AnimationPlayer animation={welcomeAnimation} loop={false} />
+            <AnimationPlayer animation={Animations.welcome} loop={false} />
             <Button
               onPress={() => {
                 setTheme(colorMode === "dark" ? "light" : "dark");

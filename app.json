@@ -50,8 +50,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Please iOS let me access the camera roll.",
-          "cameraPermission": "Please iOS let me access the camera."
+          "photosPermission": "The app accesses your photos to let you share them with your friends.",
+          "cameraPermission": "The app accesses your camera to let you share photos with your friends."
         }
       ]
     ]

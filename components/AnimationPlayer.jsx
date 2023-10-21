@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from "react";
+import { View } from "react-native";
 import LottieView from "lottie-react-native";
 
 export default function AnimationPlayer({
@@ -17,10 +18,9 @@ export default function AnimationPlayer({
   return (
     <LottieView
       ref={animRef}
+      resizeMode="cover"
       style={{
-        width: 200,
-        height: 200,
-        backgroundColor: "transparent",
+        height: 250,
       }}
       loop={loop}
       source={animation}
