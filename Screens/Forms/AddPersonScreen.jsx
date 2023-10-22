@@ -1,5 +1,10 @@
-import React, { useState, useContext } from "react";
-import { TouchableOpacity } from "react-native";
+import React, { useState, useContext, useEffect } from "react";
+import {
+  TouchableOpacity,
+  SafeAreaView,
+  StyleSheet,
+  Alert as AlertBox,
+} from "react-native";
 
 import { AntDesign } from "@expo/vector-icons";
 import {
@@ -7,27 +12,17 @@ import {
   Input,
   Button,
   ButtonText,
-  ButtonIcon,
-  AvatarBadge,
-  AvatarFallbackText,
-  Heading,
   Text,
-  View,
+  ScrollView,
   InputField,
-  Image,
-  SunIcon,
-  MoonIcon,
   Alert,
   AlertIcon,
   AlertText,
   InfoIcon,
   HStack,
   VStack,
-  Icon,
-  User,
   Avatar,
   AvatarImage,
-  ButtonGroup,
   FormControl,
   FormControlLabel,
   FormControlLabelText,
@@ -38,10 +33,9 @@ import {
   ActionsheetContent,
   ActionsheetDragIndicatorWrapper,
   ActionsheetDragIndicator,
-  FlatList,
   KeyboardAvoidingView,
 } from "@gluestack-ui/themed";
-import { Camera as CameraIcon } from "lucide-react-native";
+
 import DatePicker from "react-native-modern-datepicker";
 import { DataContext } from "../../Utils/DataProvider";
 import * as ImagePicker from "expo-image-picker";
@@ -52,6 +46,46 @@ const AddPersonScreen = ({ navigation }) => {
   const { addPerson } = useContext(DataContext);
   const [photoUri, setPhotoUri] = useState(null);
   const [error, setError] = useState(false);
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: "Add Person",
+      headerRight: () => (
+        <Button action="positive" size="xs" onPress={handleSave}>
+          <ButtonText>Add</ButtonText>
+        </Button>
+      ),
+      headerLeft: () => (
+        <Button
+          style={{ zIndex: 999 }}
+          onPress={() => {
+            AlertBox.alert(
+              "Discard changes",
+              "If you leave now, your changes will be lost.",
+              [
+                {
+                  text: "Exit",
+                  onPress: () => {
+                    navigation.goBack();
+                  },
+                  style: "destructive",
+                },
+                {
+                  text: "Keep Editing",
+                  style: "confirm",
+                },
+              ]
+            );
+          }}
+          size="md"
+          variant="link"
+          action="secondary"
+        >
+          <ButtonText show>Cancel</ButtonText>
+        </Button>
+      ),
+    });
+  }, [navigation]);
 
   const handleSave = () => {
     if (name && dob) {
@@ -76,8 +110,6 @@ const AddPersonScreen = ({ navigation }) => {
       aspect: [4, 3],
       quality: 1,
     });
-
-    console.log(result.assets[0].uri);
 
     if (!result.canceled) {
       setPhotoUri(result.assets[0].uri);
@@ -104,81 +136,84 @@ const AddPersonScreen = ({ navigation }) => {
   const handleClose = () => setShowActionsheet(!showActionsheet);
 
   return (
-    <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-      {error && (
-        <Alert mx="$2.5" action="error" variant="accent">
-          <AlertIcon as={InfoIcon} mr="$3" />
-          <AlertText>
-            We have updated our terms of service. Please review and accept to
-            continue using our service.
-          </AlertText>
-        </Alert>
-      )}
-      <Box style={{ paddingHorizontal: 25 }} justifyContent="center">
-        <VStack space="lg" reversed={false}>
-          <FormControl isRequired={true}>
+    <SafeAreaView>
+      <KeyboardAvoidingView behavior="padding">
+        {error && (
+          <Alert
+            mx="$2.5"
+            action="error"
+            variant="accent"
+            style={{ marginTop: 25 }}
+          >
+            <AlertIcon as={InfoIcon} mr="$3" />
+            <AlertText>
+              The name and date of birth fields are required.
+            </AlertText>
+          </Alert>
+        )}
+        <Box style={styles.body} justifyContent="center">
+          <ScrollView>
             <VStack space="lg" reversed={false}>
-              <FormControlLabel isRequired={false}>
-                <FormControlLabelText>Person's picture</FormControlLabelText>
-              </FormControlLabel>
-              <TouchableOpacity onPress={handleClose}>
-                <HStack space="md">
-                  <Avatar bgColor="$amber600" size="lg" borderRadius="$full">
-                    <AntDesign name="user" size={32} color="white" />
-                    {photoUri && <AvatarImage source={{ uri: photoUri }} />}
-                  </Avatar>
-                  <Text>{photoUri ? "Change photo" : "Add a photo"}</Text>
-                </HStack>
-              </TouchableOpacity>
-              <FormControlLabel mb="$1">
-                <FormControlLabelText>Person's name</FormControlLabelText>
-              </FormControlLabel>
-              <Input
-                variant="outline"
-                isRequired={true}
-                style={{
-                  borderWidth: 1,
-                  marginBottom: 20,
-                  padding: 10,
-                }}
-              >
-                <InputField
-                  value={name}
-                  onChangeText={setName}
-                  placeholder="John Doe"
-                />
-              </Input>
-              <FormControlLabel mb="$1">
-                <FormControlLabelText>Date of Birth</FormControlLabelText>
-              </FormControlLabel>
-              <DatePicker
-                onDateChange={setDob}
-                mode="calendar"
-                maximumDate={today}
-                options={{
-                  backgroundColor: "#090C08",
-                  textHeaderColor: "#FFA25B",
-                  textDefaultColor: "#F6E7C1",
-                  selectedTextColor: "#fff",
-                  mainColor: "#F4722B",
-                  textSecondaryColor: "#D6C7A1",
-                  borderColor: "rgba(122, 146, 165, 0.1)",
-                }}
+              <FormControl isRequired={true}>
+                <VStack space="lg" reversed={false}>
+                  <FormControlLabel isRequired={false}>
+                    <FormControlLabelText>
+                      Person's picture
+                    </FormControlLabelText>
+                  </FormControlLabel>
+                  <TouchableOpacity onPress={handleClose}>
+                    <HStack space="md" alignItems="center">
+                      <Avatar
+                        bgColor="$amber600"
+                        size="lg"
+                        borderRadius="$full"
+                      >
+                        <AntDesign name="user" size={32} color="white" />
+                        {photoUri && <AvatarImage source={{ uri: photoUri }} />}
+                      </Avatar>
+                      <Text>{photoUri ? "Change photo" : "Add a photo"}</Text>
+                    </HStack>
+                  </TouchableOpacity>
+                  <FormControlLabel mb="$1">
+                    <FormControlLabelText>Person's name</FormControlLabelText>
+                  </FormControlLabel>
+                  <Input
+                    variant="outline"
+                    isRequired={true}
+                    style={{
+                      borderWidth: 1,
+                      marginBottom: 20,
+                      padding: 10,
+                    }}
+                  >
+                    <InputField
+                      value={name}
+                      onChangeText={setName}
+                      placeholder="John Doe"
+                    />
+                  </Input>
+                  <FormControlLabel mb="$1">
+                    <FormControlLabelText>Date of Birth</FormControlLabelText>
+                  </FormControlLabel>
+                  <DatePicker
+                    onDateChange={setDob}
+                    value={dob}
+                    mode="calendar"
+                    maximumDate={today}
+                  />
+                </VStack>
+              </FormControl>
+              <ChosePicture
+                showActionsheet={showActionsheet}
+                handleClose={handleClose}
+                takePhoto={takePhoto}
+                pickImage={pickImage}
               />
             </VStack>
-          </FormControl>
-          <ChosePicture
-            showActionsheet={showActionsheet}
-            handleClose={handleClose}
-            takePhoto={takePhoto}
-            pickImage={pickImage}
-          />
-          <Button action="positive" onPress={handleSave}>
-            <ButtonText>Save</ButtonText>
-          </Button>
-        </VStack>
-      </Box>
-    </KeyboardAvoidingView>
+          </ScrollView>
+        </Box>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -207,3 +242,15 @@ function ChosePicture({ showActionsheet, handleClose, takePhoto, pickImage }) {
 }
 
 export default AddPersonScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    position: "relative",
+    paddingTop: 50,
+  },
+  body: {
+    paddingTop: 15,
+    paddingHorizontal: 25,
+  },
+});

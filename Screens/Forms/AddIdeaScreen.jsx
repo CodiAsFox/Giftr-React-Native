@@ -1,12 +1,40 @@
 import React, { useState, useEffect, useContext } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  KeyboardAvoidingView,
-  Image,
+  TouchableOpacity,
+  SafeAreaView,
+  StyleSheet,
+  Alert as AlertBox,
 } from "react-native";
+import {
+  Box,
+  Input,
+  Button,
+  ButtonText,
+  Text,
+  ScrollView,
+  InputField,
+  Alert,
+  View,
+  AlertIcon,
+  AlertText,
+  InfoIcon,
+  HStack,
+  VStack,
+  Avatar,
+  Image,
+  AvatarImage,
+  FormControl,
+  FormControlLabel,
+  FormControlLabelText,
+  Actionsheet,
+  ActionsheetItem,
+  ActionsheetItemText,
+  ActionsheetBackdrop,
+  ActionsheetContent,
+  ActionsheetDragIndicatorWrapper,
+  ActionsheetDragIndicator,
+  KeyboardAvoidingView,
+} from "@gluestack-ui/themed";
 import { Camera } from "expo-camera";
 import { DataContext } from "../../Utils/DataProvider";
 import * as FileSystem from "expo-file-system";
@@ -14,13 +42,55 @@ import * as FileSystem from "expo-file-system";
 const AddIdeaScreen = ({ route, navigation }) => {
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
 
+  const [person, setPerson] = useState([]);
   const [type, setType] = useState(Camera.Constants.Type.back);
 
   const { personId } = route.params;
-  const { addIdea } = useContext(DataContext);
+  const { getPerson, addIdea } = useContext(DataContext);
   const [text, setText] = useState("");
   const [image, setImage] = useState(null);
   const [camera, setCamera] = useState(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: "Add Person",
+      headerRight: () => (
+        <Button action="positive" size="xs" onPress={handleSave}>
+          <ButtonText>Add Idea</ButtonText>
+        </Button>
+      ),
+      headerLeft: () => (
+        <Button
+          style={{ zIndex: 999 }}
+          onPress={() => {
+            AlertBox.alert(
+              "Discard changes",
+              "If you leave now, your changes will be lost.",
+              [
+                {
+                  text: "Exit",
+                  onPress: () => {
+                    navigation.goBack();
+                  },
+                  style: "destructive",
+                },
+                {
+                  text: "Keep Editing",
+                  style: "confirm",
+                },
+              ]
+            );
+          }}
+          size="md"
+          variant="link"
+          action="secondary"
+        >
+          <ButtonText show>Cancel</ButtonText>
+        </Button>
+      ),
+    });
+  }, [navigation]);
 
   useEffect(() => {
     (async () => {
@@ -41,7 +111,7 @@ const AddIdeaScreen = ({ route, navigation }) => {
       await addIdea(personId, newIdea);
       navigation.goBack();
     } else {
-      console.error("Both text and image are required");
+      setError(true);
     }
   };
 
@@ -58,39 +128,74 @@ const AddIdeaScreen = ({ route, navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-      <View style={{ margin: 20 }}>
-        <TextInput
-          value={text}
-          onChangeText={setText}
-          placeholder="Idea"
-          style={{
-            borderColor: "gray",
-            borderWidth: 1,
-            marginBottom: 20,
-            padding: 10,
-          }}
-        />
-        {image ? (
-          <Image
-            source={{ uri: image.uri }}
-            style={{ width: 300, height: 200 }}
-          />
-        ) : (
-          <Camera
-            ref={(ref) => setCamera(ref)}
-            style={{ width: 200, height: 300 }}
-            ratio="2:3"
-          />
+    <SafeAreaView>
+      <KeyboardAvoidingView behavior="padding">
+        {error && (
+          <Alert
+            mx="$2.5"
+            action="error"
+            variant="accent"
+            style={{ marginTop: 25 }}
+          >
+            <AlertIcon as={InfoIcon} mr="$3" />
+            <AlertText>The idea name and photo fields are required.</AlertText>
+          </Alert>
         )}
-        {!image && <Button title="Capture" onPress={handleCapture} />}
-        <View style={{ marginTop: 20 }}>
-          <Button title="Save" onPress={handleSave} />
-          <Button title="Cancel" onPress={() => navigation.goBack()} />
-        </View>
-      </View>
-    </KeyboardAvoidingView>
+        <Box style={styles.body} justifyContent="center">
+          <ScrollView>
+            <VStack space="lg" reversed={false}>
+              <FormControl isRequired={true}>
+                <VStack space="lg" reversed={false}>
+                  <FormControlLabel mb="$1">
+                    <FormControlLabelText>Idea</FormControlLabelText>
+                  </FormControlLabel>
+                  <Input
+                    variant="outline"
+                    isRequired={true}
+                    style={{
+                      borderWidth: 1,
+                      marginBottom: 20,
+                      padding: 10,
+                    }}
+                  >
+                    <InputField
+                      value={text}
+                      onChangeText={setText}
+                      placeholder="Awesome shoes"
+                    />
+                  </Input>
+                  {image ? (
+                    <Image
+                      source={{ uri: image.uri }}
+                      style={{ width: 300, height: 200 }}
+                    />
+                  ) : (
+                    <Camera
+                      ref={(ref) => setCamera(ref)}
+                      style={{ width: 200, height: 300 }}
+                      ratio="2:3"
+                    />
+                  )}
+                  {!image && <Button title="Capture" onPress={handleCapture} />}
+                </VStack>
+              </FormControl>
+            </VStack>
+          </ScrollView>
+        </Box>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
 export default AddIdeaScreen;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    position: "relative",
+    paddingTop: 50,
+  },
+  body: {
+    paddingTop: 15,
+    paddingHorizontal: 25,
+  },
+});

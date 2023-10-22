@@ -2,6 +2,23 @@ import React, { createContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { v4 as uuidv4 } from "uuid";
 
+const setData = async (key, value) => {
+  try {
+    await AsyncStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error(`Failed to set data for key ${key}:`, error);
+  }
+};
+
+const getData = async (key) => {
+  try {
+    const value = await AsyncStorage.getItem(key);
+    return value ? JSON.parse(value) : null;
+  } catch (error) {
+    console.error(`Failed to get data for key ${key}:`, error);
+  }
+};
+
 const DataContext = createContext();
 
 const DataProvider = ({ children }) => {
@@ -23,22 +40,8 @@ const DataProvider = ({ children }) => {
     loadInitialData();
   }, []);
 
-  const setData = async (key, value) => {
-    try {
-      await AsyncStorage.setItem(key, JSON.stringify(value));
-    } catch (error) {
-      console.error(`Failed to set data for key ${key}:`, error);
-    }
-  };
-
-  const getData = async (key) => {
-    try {
-      const value = await AsyncStorage.getItem(key);
-      return value ? JSON.parse(value) : null;
-    } catch (error) {
-      console.error(`Failed to get data for key ${key}:`, error);
-    }
-  };
+  const setData = setData;
+  const getData = getData;
 
   const addPerson = async (person) => {
     const newPerson = { ...person, id: uuidv4(), ideas: [] };
@@ -142,4 +145,4 @@ const DataProvider = ({ children }) => {
   );
 };
 
-export { DataProvider, DataContext };
+export { DataProvider, DataContext, setData, getData };

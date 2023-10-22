@@ -4,30 +4,21 @@ import {
   Alert,
   TouchableOpacity,
   StyleSheet,
-  ImageBackground,
   SafeAreaView,
 } from "react-native";
 import {
-  Box,
   Button,
   ButtonText,
   ButtonIcon,
-  Heading,
   Text,
   View,
   Image,
-  SunIcon,
-  MoonIcon,
-  HStack,
-  VStack,
-  Avatar,
-  AvatarImage,
   FlatList,
 } from "@gluestack-ui/themed";
-import { ThemeContext } from "../Utils/ThemeProvider";
 import { DataContext } from "../Utils/DataProvider";
 import { useIsFocused } from "@react-navigation/native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
+import { Ionicons } from "@expo/vector-icons";
 
 const SwipeableRow = ({ children, onDelete }) => {
   const renderRightActions = () => (
@@ -50,15 +41,43 @@ const IdeaScreen = ({ route, navigation }) => {
   const [update, setUpdate] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const { bannerImg, primaryContentColor, secondContentColor } =
-    useContext(ThemeContext);
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: `${person.name}'s Ideas`,
+      headerRight: () => (
+        <Button
+          onPress={() => {
+            navigation.navigate("AddIdeaScreen", { personId });
+          }}
+          size="sm"
+          variant="link"
+          action="secondary"
+        >
+          <ButtonText>Add Idea</ButtonText>
+        </Button>
+      ),
+      headerLeft: () => (
+        <Button
+          style={{ zIndex: 999 }}
+          onPress={() => {
+            navigation.goBack();
+          }}
+          size="md"
+          variant="link"
+          action="secondary"
+        >
+          <ButtonIcon as={Ionicons} name="chevron-back" />
+          <ButtonText show>My list</ButtonText>
+        </Button>
+      ),
+    });
+  }, [navigation, person]);
 
   const handleImagePress = (imageUri) => {
     setSelectedImage(imageUri);
     setModalVisible(true);
   };
-
-  console.log(getPerson(personId));
 
   useEffect(() => {
     if (isFocused) {
@@ -72,39 +91,24 @@ const IdeaScreen = ({ route, navigation }) => {
   }, [isFocused, update]);
 
   const handleDelete = async (ideaId) => {
-    // await deleteIdea(personId, ideaId);
-    // setUpdate((prev) => !prev);
-
-    Alert.alert(
-      "Delete Idea", // title
-      "Are you sure you want to delete this idea?", // message
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
+    Alert.alert("Delete Idea", "Are you sure you want to delete this idea?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        onPress: async () => {
+          await deleteIdea(personId, ideaId);
+          setUpdate((prev) => !prev);
         },
-        {
-          text: "Delete",
-          onPress: async () => {
-            await deleteIdea(personId, ideaId);
-            setUpdate((prev) => !prev);
-          },
-          style: "destructive",
-        },
-      ]
-    );
+        style: "destructive",
+      },
+    ]);
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.banner}>
-        <ImageBackground
-          source={bannerImg}
-          resizeMode="cover"
-          style={styles.banner}
-        />
-        <Heading style={styles.bannerText}></Heading>
-      </View>
       <View style={{ padding: 20 }}>
         <Modal
           visible={modalVisible}

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import {
   Box,
   Button,
@@ -7,9 +7,6 @@ import {
   Heading,
   Text,
   View,
-  Image,
-  SunIcon,
-  MoonIcon,
   HStack,
   VStack,
   Avatar,
@@ -17,7 +14,7 @@ import {
   FlatList,
 } from "@gluestack-ui/themed";
 import { AntDesign } from "@expo/vector-icons";
-import { ThemeContext } from "../Utils/ThemeProvider";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   Alert,
   TouchableOpacity,
@@ -30,9 +27,7 @@ import Swipeable from "react-native-gesture-handler/Swipeable";
 
 import { FontAwesome5 } from "@expo/vector-icons";
 
-import { useColorMode } from "@gluestack-ui/themed";
 import AnimationPlayer from "../Components/AnimationPlayer";
-import { Ionicons } from "@expo/vector-icons";
 
 import { Assets, Animations } from "../assets/Assets";
 
@@ -40,7 +35,6 @@ const SwipeableRow = ({ children, onDelete }) => {
   const renderRightActions = () => (
     <View>
       <Button onPress={onDelete}>
-        <ButtonText>Delete</ButtonText>
         <ButtonIcon as={FontAwesome5} name="trash" />
       </Button>
     </View>
@@ -52,11 +46,25 @@ const SwipeableRow = ({ children, onDelete }) => {
 };
 
 const PeopleScreen = ({ navigation }) => {
-  const colorMode = useColorMode();
-
   const { people, deletePerson } = useContext(DataContext);
-  const { bannerImg, primaryContentColor, secondContentColor } =
-    useContext(ThemeContext);
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: "Home",
+      headerRight: () => (
+        <Button
+          onPress={() => {
+            navigation.navigate("AddPersonScreen");
+          }}
+          size="sm"
+          variant="link"
+          action="secondary"
+        >
+          <ButtonText>Add Person</ButtonText>
+        </Button>
+      ),
+    });
+  }, [navigation]);
 
   const handleDelete = (personId, name) => {
     Alert.alert(
@@ -88,42 +96,22 @@ const PeopleScreen = ({ navigation }) => {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.banner}>
-        <ImageBackground
-          source={bannerImg}
-          resizeMode="cover"
-          style={styles.banner}
-        />
-        <Heading style={styles.bannerText}>My List</Heading>
-      </View>
-      <View style={styles.content}>
-        {sortedPeople.length > 0 ? (
-          <FlatList
-            data={sortedPeople}
-            style={{ flex: 1 }}
-            backgroundColor={primaryContentColor}
-            renderItem={({ item }) => (
-              <SwipeableRow onDelete={() => handleDelete(item.id, item.name)}>
-                <Box
-                  borderBottomWidth="$1"
-                  borderColor="$trueGray800"
-                  backgroundColor={secondContentColor}
-                  sx={{
-                    _dark: {
-                      borderColor: "$trueGray100",
-                    },
-                    "@base": {
-                      pl: 0,
-                      pr: 0,
-                    },
-                    "@sm": {
-                      pl: "$4",
-                      pr: "$5",
-                    },
-                  }}
-                  py="$2"
-                >
+    <GestureHandlerRootView>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.banner}>
+          <ImageBackground
+            source={Assets.banner}
+            resizeMode="cover"
+            style={styles.banner}
+          />
+          <Heading style={styles.bannerText}>My List</Heading>
+        </View>
+        <View style={styles.content}>
+          {sortedPeople.length > 0 ? (
+            <FlatList
+              data={sortedPeople}
+              renderItem={({ item }) => (
+                <SwipeableRow onDelete={() => handleDelete(item.id, item.name)}>
                   <TouchableOpacity
                     onPress={() => navigateToIdeas(item.id)}
                     style={{ paddingHorizontal: 20, paddingVertical: 5 }}
@@ -140,52 +128,24 @@ const PeopleScreen = ({ navigation }) => {
                         )}
                       </Avatar>
                       <VStack>
-                        <Text
-                          color="$coolGray800"
-                          fontWeight="$bold"
-                          sx={{
-                            _dark: {
-                              color: "$warmGray100",
-                            },
-                          }}
-                        >
-                          {item.name}
-                        </Text>
-                        <Text
-                          color="$coolGray600"
-                          sx={{
-                            _dark: {
-                              color: "$warmGray200",
-                            },
-                          }}
-                        >
-                          {item.recentText}
-                        </Text>
+                        <Text fontWeight="$bold">{item.name}</Text>
+                        <Text>{item.dob}</Text>
                       </VStack>
-                      <Text
-                        fontSize="$xs"
-                        color="$coolGray800"
-                        alignSelf="flex-start"
-                        sx={{
-                          _dark: {
-                            color: "$warmGray100",
-                          },
-                        }}
-                      >
-                        {item.dob}
-                      </Text>
+                      <VStack>
+                        <Text>View</Text>
+                      </VStack>
                     </HStack>
                   </TouchableOpacity>
-                </Box>
-              </SwipeableRow>
-            )}
-            keyExtractor={(item) => item.id}
-          />
-        ) : (
-          <EmptyPeople navigation={navigation} />
-        )}
-      </View>
-    </SafeAreaView>
+                </SwipeableRow>
+              )}
+              keyExtractor={(item) => item.id}
+            />
+          ) : (
+            <EmptyPeople navigation={navigation} />
+          )}
+        </View>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 };
 
@@ -211,8 +171,7 @@ function EmptyPeople({ navigation }) {
           action="secondary"
           style={styles.button}
         >
-          <ButtonText>Add Person </ButtonText>
-          <ButtonIcon as={Ionicons} name="ios-person-add" />
+          <ButtonText>Add Person</ButtonText>
         </Button>
       </Box>
     </View>
@@ -222,17 +181,13 @@ function EmptyPeople({ navigation }) {
 export default PeopleScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    position: "relative",
-  },
   emptyBox: {
     alignItems: "center",
     marginTop: -65,
   },
   emptyBody: {
     justifyContent: "center",
-    height: "100%",
+    height: "90%",
   },
   banner: {
     left: 0,
@@ -245,9 +200,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     position: "absolute",
   },
-  content: {
-    flex: 1,
-  },
+
   blurContainer: {
     padding: 20,
     borderRadius: 10,
