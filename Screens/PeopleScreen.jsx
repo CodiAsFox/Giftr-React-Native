@@ -33,15 +33,20 @@ import { Assets, Animations } from "../assets/Assets";
 
 const SwipeableRow = ({ children, onDelete }) => {
   const renderRightActions = () => (
-    <View>
-      <Button onPress={onDelete}>
+    <Box style={{ justifyContent: "center" }}>
+      <Button onPress={onDelete} height={"100%"} action="negative">
         <ButtonIcon as={FontAwesome5} name="trash" />
       </Button>
-    </View>
+    </Box>
   );
 
   return (
-    <Swipeable renderRightActions={renderRightActions}>{children}</Swipeable>
+    <Swipeable
+      style={{ alignItems: "center", flex: 1, width: "100%" }}
+      renderRightActions={renderRightActions}
+    >
+      {children}
+    </Swipeable>
   );
 };
 
@@ -110,27 +115,40 @@ const PeopleScreen = ({ navigation }) => {
           {sortedPeople.length > 0 ? (
             <FlatList
               data={sortedPeople}
+              keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <SwipeableRow onDelete={() => handleDelete(item.id, item.name)}>
                   <TouchableOpacity
                     onPress={() => navigateToIdeas(item.id)}
-                    style={{ paddingHorizontal: 20, paddingVertical: 5 }}
+                    style={{
+                      paddingHorizontal: 20,
+                      paddingVertical: 15,
+                      borderBottomColor: "#ccc",
+                      borderBottomWidth: 1,
+                      backgroundColor: "#fff",
+                    }}
                   >
-                    <HStack space="md" justifyContent="space-between">
-                      <Avatar
-                        bgColor="$amber600"
-                        size="md"
-                        borderRadius="$full"
-                      >
-                        <AntDesign name="user" size={32} color="white" />
-                        {item.photoUri && (
-                          <AvatarImage source={{ uri: item.photoUri }} />
-                        )}
-                      </Avatar>
-                      <VStack>
-                        <Text fontWeight="$bold">{item.name}</Text>
-                        <Text>{item.dob}</Text>
-                      </VStack>
+                    <HStack
+                      space="md"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <HStack space="md">
+                        <Avatar
+                          bgColor="$amber600"
+                          size="md"
+                          borderRadius="$full"
+                        >
+                          <AntDesign name="user" size={32} color="white" />
+                          {item.photoUri && (
+                            <AvatarImage source={{ uri: item.photoUri }} />
+                          )}
+                        </Avatar>
+                        <VStack>
+                          <Text fontWeight="$bold">{item.name}</Text>
+                          <Text>{item.dob}</Text>
+                        </VStack>
+                      </HStack>
                       <VStack>
                         <Text>View</Text>
                       </VStack>
@@ -138,7 +156,6 @@ const PeopleScreen = ({ navigation }) => {
                   </TouchableOpacity>
                 </SwipeableRow>
               )}
-              keyExtractor={(item) => item.id}
             />
           ) : (
             <EmptyPeople navigation={navigation} />

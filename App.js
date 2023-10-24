@@ -1,6 +1,6 @@
 import { GluestackUIProvider } from "@gluestack-ui/themed";
 import React from "react";
-
+import { Platform } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -16,6 +16,17 @@ import { config } from "@gluestack-ui/config";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  const os = Platform.OS;
+
+  const options = {
+    ios: {
+      presentation: "modal",
+    },
+    android: {
+      presentation: "card",
+    },
+  };
+
   return (
     <GluestackUIProvider config={config}>
       <DataProvider>
@@ -26,13 +37,13 @@ export default function App() {
               <Stack.Screen
                 name="AddPersonScreen"
                 component={AddPersonScreen}
-                options={{ presentation: "modal" }}
+                options={options[os]}
               />
               <Stack.Screen name="IdeaScreen" component={IdeaScreen} />
               <Stack.Screen
                 name="AddIdeaScreen"
                 component={AddIdeaScreen}
-                options={{ presentation: "modal" }}
+                options={options[os]}
               />
             </Stack.Navigator>
           </NavigationContainer>

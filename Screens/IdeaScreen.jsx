@@ -1,20 +1,32 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
-  Modal,
   Alert,
   TouchableOpacity,
-  StyleSheet,
+  ImageBackground,
   SafeAreaView,
+  StyleSheet,
 } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 import {
+  Box,
   Button,
   ButtonText,
   ButtonIcon,
+  Heading,
+  Image,
   Text,
   View,
-  Image,
+  Modal,
+  HStack,
+  VStack,
+  Avatar,
+  AvatarImage,
   FlatList,
 } from "@gluestack-ui/themed";
+import AnimationPlayer from "../Components/AnimationPlayer";
+
+import { Assets, Animations } from "../assets/Assets";
 import { DataContext } from "../Utils/DataProvider";
 import { useIsFocused } from "@react-navigation/native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
@@ -121,33 +133,31 @@ const IdeaScreen = ({ route, navigation }) => {
             style={{ width: 15, height: 15 }}
           />
         </Modal>
-        <Text>Ideas for Person ID: {person.name}</Text>
-        {ideas.length > 0 ? (
-          <FlatList
-            data={ideas}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <SwipeableRow onDelete={() => handleDelete(item.id)}>
-                <View style={{ marginBottom: 10 }}>
-                  <Text>{item.text}</Text>
-                  <TouchableOpacity onPress={() => handleImagePress(item.img)}>
-                    <Image
-                      source={{ uri: item.img }}
-                      style={{ width: 50, height: 50 }}
-                    />
-                  </TouchableOpacity>
-                </View>
-              </SwipeableRow>
-            )}
-          />
-        ) : (
-          <Text>No ideas found. Add some!</Text>
-        )}
-        <TouchableOpacity
-          onPress={() => navigation.navigate("AddIdeaScreen", { personId })}
-        >
-          <Text>Add Idea</Text>
-        </TouchableOpacity>
+        <View style={styles.content}>
+          {ideas.length > 0 ? (
+            <FlatList
+              data={ideas}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <SwipeableRow onDelete={() => handleDelete(item.id)}>
+                  <View style={{ marginBottom: 10 }}>
+                    <Text>{item.text}</Text>
+                    <TouchableOpacity
+                      onPress={() => handleImagePress(item.img)}
+                    >
+                      <Image
+                        source={{ uri: item.img }}
+                        style={{ width: 50, height: 50 }}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </SwipeableRow>
+              )}
+            />
+          ) : (
+            <EmptyGifs navigation={navigation} person={person} />
+          )}
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -155,18 +165,59 @@ const IdeaScreen = ({ route, navigation }) => {
 
 export default IdeaScreen;
 
+function EmptyGifs({ navigation, person }) {
+  return (
+    <GestureHandlerRootView>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.banner}>
+          <ImageBackground
+            source={Assets.banner}
+            resizeMode="cover"
+            style={styles.banner}
+          />
+          <Heading style={styles.bannerText}>{person.name}'s gift list</Heading>
+        </View>
+        <View style={styles.content}>
+          <View style={styles.emptyBody}>
+            <Box style={styles.emptyBox}>
+              <Heading style>{person.name} has no ideas saved.</Heading>
+              <Text style={{ marginBottom: 20 }}>
+                Add a one to get your gift list started.
+              </Text>
+              <View style={{ height: 250 }}>
+                <AnimationPlayer
+                  animation={Animations.sad}
+                  autoPlay={true}
+                  loop={false}
+                />
+              </View>
+              <Button
+                onPress={() => {
+                  navigation.navigate("AddIdeaScreen", { personId: person.id });
+                }}
+                size="xs"
+                variant="outline"
+                action="secondary"
+                style={styles.button}
+              >
+                <ButtonText>Add Idea</ButtonText>
+              </Button>
+            </Box>
+          </View>
+        </View>
+      </SafeAreaView>
+    </GestureHandlerRootView>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    position: "relative",
-  },
   emptyBox: {
     alignItems: "center",
     marginTop: -65,
   },
   emptyBody: {
     justifyContent: "center",
-    height: "100%",
+    height: "90%",
   },
   banner: {
     left: 0,
@@ -179,9 +230,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     position: "absolute",
   },
-  content: {
-    flex: 1,
-  },
+
   blurContainer: {
     padding: 20,
     borderRadius: 10,

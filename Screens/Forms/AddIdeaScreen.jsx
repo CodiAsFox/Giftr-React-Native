@@ -9,178 +9,153 @@ import {
   Box,
   Input,
   Button,
-  ButtonText,
   Text,
+  Heading,
   ScrollView,
-  InputField,
   Alert,
-  View,
-  AlertIcon,
-  AlertText,
-  InfoIcon,
-  HStack,
   VStack,
-  Avatar,
   Image,
-  AvatarImage,
-  FormControl,
-  FormControlLabel,
-  FormControlLabelText,
-  Actionsheet,
-  ActionsheetItem,
-  ActionsheetItemText,
-  ActionsheetBackdrop,
-  ActionsheetContent,
-  ActionsheetDragIndicatorWrapper,
-  ActionsheetDragIndicator,
+  ButtonGroup,
+  ThreeDotsIcon,
+  ButtonIcon,
+  ButtonText,
   KeyboardAvoidingView,
+  HStack,
 } from "@gluestack-ui/themed";
 import { Camera } from "expo-camera";
 import { DataContext } from "../../Utils/DataProvider";
 import * as FileSystem from "expo-file-system";
+import * as ImagePicker from "expo-image-picker";
 
 const AddIdeaScreen = ({ route, navigation }) => {
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
-
-  const [person, setPerson] = useState([]);
-  const [type, setType] = useState(Camera.Constants.Type.back);
-
-  const { personId } = route.params;
-  const { getPerson, addIdea } = useContext(DataContext);
   const [text, setText] = useState("");
   const [image, setImage] = useState(null);
   const [camera, setCamera] = useState(null);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
-    navigation.setOptions({
-      title: "Add Person",
-      headerRight: () => (
-        <Button action="positive" size="xs" onPress={handleSave}>
-          <ButtonText>Add Idea</ButtonText>
-        </Button>
-      ),
-      headerLeft: () => (
-        <Button
-          style={{ zIndex: 999 }}
-          onPress={() => {
-            AlertBox.alert(
-              "Discard changes",
-              "If you leave now, your changes will be lost.",
-              [
-                {
-                  text: "Exit",
-                  onPress: () => {
-                    navigation.goBack();
-                  },
-                  style: "destructive",
-                },
-                {
-                  text: "Keep Editing",
-                  style: "confirm",
-                },
-              ]
-            );
-          }}
-          size="md"
-          variant="link"
-          action="secondary"
-        >
-          <ButtonText show>Cancel</ButtonText>
-        </Button>
-      ),
-    });
-  }, [navigation]);
+  const { personId } = route.params;
+  const { addIdea } = useContext(DataContext);
 
   useEffect(() => {
-    (async () => {
-      const cameraStatus = await Camera.requestCameraPermissionsAsync();
-      setHasCameraPermission(cameraStatus.status === "granted");
-    })();
+    requestCameraPermission();
   }, []);
 
+  const requestCameraPermission = async () => {
+    const { status } = await Camera.requestCameraPermissionsAsync();
+    setHasCameraPermission(status === "granted");
+  };
+
   const handleSave = async () => {
-    if (text && image) {
-      const newIdea = {
-        id: "",
-        text,
-        img: image.uri,
-        width: image.width,
-        height: image.height,
-      };
-      await addIdea(personId, newIdea);
-      navigation.goBack();
-    } else {
+    if (!text || !image) {
       setError(true);
+      return;
+    }
+
+    const newIdea = {
+      id: "",
+      text,
+      img: image.uri,
+      width: image.width,
+      height: image.height,
+    };
+
+    await addIdea(personId, newIdea);
+    navigation.goBack();
+  };
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      const newUri = `${FileSystem.documentDirectory}${result.uri
+        .split("/")
+        .pop()}`;
+      await FileSystem.moveAsync({ from: result.uri, to: newUri });
+      setImage({ uri: newUri, width: result.width, height: result.height });
     }
   };
 
-  const handleCapture = async () => {
-    if (camera) {
-      const photo = await camera.takePictureAsync();
-      const newUri = FileSystem.documentDirectory + photo.uri.split("/").pop();
-      await FileSystem.moveAsync({
-        from: photo.uri,
-        to: newUri,
-      });
-      setImage({ uri: newUri, width: photo.width, height: photo.height });
+  const captureImage = async () => {
+    console.log(image);
+
+    if (image) {
+      setImage(null);
+      return;
     }
+    if (!camera) return;
+
+    const photo = await camera.takePictureAsync();
+    const newUri = `${FileSystem.documentDirectory}${photo.uri
+      .split("/")
+      .pop()}`;
+    await FileSystem.moveAsync({ from: photo.uri, to: newUri });
+
+    console.log(newUri);
+    setImage({ uri: newUri, width: photo.width, height: photo.height });
   };
 
   return (
     <SafeAreaView>
       <KeyboardAvoidingView behavior="padding">
         {error && (
-          <Alert
-            mx="$2.5"
-            action="error"
-            variant="accent"
-            style={{ marginTop: 25 }}
-          >
-            <AlertIcon as={InfoIcon} mr="$3" />
-            <AlertText>The idea name and photo fields are required.</AlertText>
+          <Alert>
+            <Text>The idea name and photo fields are required.</Text>
           </Alert>
         )}
-        <Box style={styles.body} justifyContent="center">
+        <Box>
           <ScrollView>
-            <VStack space="lg" reversed={false}>
-              <FormControl isRequired={true}>
-                <VStack space="lg" reversed={false}>
-                  <FormControlLabel mb="$1">
-                    <FormControlLabelText>Idea</FormControlLabelText>
-                  </FormControlLabel>
-                  <Input
-                    variant="outline"
-                    isRequired={true}
-                    style={{
-                      borderWidth: 1,
-                      marginBottom: 20,
-                      padding: 10,
-                    }}
-                  >
-                    <InputField
-                      value={text}
-                      onChangeText={setText}
-                      placeholder="Awesome shoes"
-                    />
-                  </Input>
-                  {image ? (
-                    <Image
-                      source={{ uri: image.uri }}
-                      style={{ width: 300, height: 200 }}
-                    />
-                  ) : (
-                    <Camera
-                      ref={(ref) => setCamera(ref)}
-                      style={{ width: 200, height: 300 }}
-                      ratio="2:3"
-                    />
-                  )}
-                  {!image && <Button title="Capture" onPress={handleCapture} />}
-                </VStack>
-              </FormControl>
+            <VStack>
+              <Text>Idea</Text>
+              <Input
+                value={text}
+                onChangeText={setText}
+                placeholder="Awesome shoes"
+              />
+              {image ? (
+                <Image
+                  source={{ uri: image.uri }}
+                  alt="Idea image"
+                  style={{ width: "100%", height: 450, resizeMode: "contain" }}
+                />
+              ) : (
+                <Camera
+                  ref={(ref) => setCamera(ref)}
+                  style={{ width: "100%", height: 400, resizeMode: "contain" }}
+                />
+              )}
+
+              <Heading>{image ? "Replace Image" : "Add Image"}</Heading>
+              <HStack space="md" justifyContent="space-between">
+                <Button
+                  variant="solid"
+                  size="lg"
+                  action="primary"
+                  onPress={captureImage}
+                >
+                  <ButtonText>
+                    {image ? "From Camera" : "Take Photo"}
+                  </ButtonText>
+                </Button>
+                <Button
+                  variant="solid"
+                  size="lg"
+                  action="secondary"
+                  onPress={pickImage}
+                >
+                  <ButtonText>Gallery</ButtonText>
+                </Button>
+              </HStack>
             </VStack>
           </ScrollView>
+          <Button onPress={handleSave}>
+            <Text>Add Idea</Text>
+          </Button>
         </Box>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -188,14 +163,8 @@ const AddIdeaScreen = ({ route, navigation }) => {
 };
 
 export default AddIdeaScreen;
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    position: "relative",
-    paddingTop: 50,
-  },
-  body: {
-    paddingTop: 15,
-    paddingHorizontal: 25,
-  },
+  container: { flex: 1, paddingTop: 50 },
+  body: { paddingTop: 15, paddingHorizontal: 25 },
 });

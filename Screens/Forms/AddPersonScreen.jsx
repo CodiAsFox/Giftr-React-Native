@@ -50,11 +50,6 @@ const AddPersonScreen = ({ navigation }) => {
   useEffect(() => {
     navigation.setOptions({
       title: "Add Person",
-      headerRight: () => (
-        <Button action="positive" size="xs" onPress={handleSave}>
-          <ButtonText>Add</ButtonText>
-        </Button>
-      ),
       headerLeft: () => (
         <Button
           style={{ zIndex: 999 }}
@@ -96,6 +91,7 @@ const AddPersonScreen = ({ navigation }) => {
         photoUri: photoUri ? photoUri : undefined,
         ideas: [],
       };
+
       addPerson(newPerson);
       navigation.goBack();
     } else {
@@ -179,7 +175,6 @@ const AddPersonScreen = ({ navigation }) => {
                   </FormControlLabel>
                   <Input
                     variant="outline"
-                    isRequired={true}
                     style={{
                       borderWidth: 1,
                       marginBottom: 20,
@@ -187,6 +182,7 @@ const AddPersonScreen = ({ navigation }) => {
                     }}
                   >
                     <InputField
+                      type="text"
                       value={name}
                       onChangeText={setName}
                       placeholder="John Doe"
@@ -211,6 +207,9 @@ const AddPersonScreen = ({ navigation }) => {
               />
             </VStack>
           </ScrollView>
+          <Button action="positive" size="xs" onPress={handleSave}>
+            <ButtonText>Add</ButtonText>
+          </Button>
         </Box>
       </KeyboardAvoidingView>
     </SafeAreaView>
