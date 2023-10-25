@@ -4,16 +4,20 @@
  * Again I think I made something more complex than it should be.
  * But I am having so much fun with React Native. I hope it's ok.
  *
+ * I had some crazy ideas that ededup eating alot of production time.
+ * I removed them and kept the core functionality.
+ *
+ *
  * Tay.
  * ***/
 
 import { GluestackUIProvider } from "@gluestack-ui/themed";
-import React, { useState, useEffect, useContext } from "react";
-import { Platform, StatusBar } from "react-native";
+import React from "react";
+import { Platform } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { DataProvider, setData, getData } from "./Utils/DataProvider";
+import { DataProvider } from "./Utils/DataProvider";
 import PeopleScreen from "./Screens/PeopleScreen";
 import { config } from "@gluestack-ui/config";
 import IdeaScreen from "./Screens/IdeaScreen";

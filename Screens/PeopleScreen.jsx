@@ -22,7 +22,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   Alert,
   TouchableOpacity,
-  ImageBackground,
   SafeAreaView,
   StyleSheet,
 } from "react-native";
@@ -32,7 +31,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 
 import AnimationPlayer from "../Components/AnimationPlayer";
 
-import { Assets, Animations } from "../assets/Assets";
+import { Animations } from "../assets/Assets";
 
 const SwipeableRow = ({ children, onDelete }) => {
   const renderRightActions = () => (
@@ -109,14 +108,6 @@ const PeopleScreen = ({ navigation }) => {
   return (
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaView style={styles.container}>
-        <View style={styles.banner}>
-          <ImageBackground
-            source={require("../assets/BannerDark.jpeg")}
-            resizeMode="cover"
-            style={styles.banner}
-          />
-          <Heading style={styles.bannerText}>My List</Heading>
-        </View>
         <View flex={1} style={styles.content}>
           {sortedPeople.length > 0 ? (
             <FlatList

@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from "react";
 import {
   Alert,
   TouchableOpacity,
-  ImageBackground,
   SafeAreaView,
   StyleSheet,
   Modal,
@@ -24,7 +23,7 @@ import {
 import { BlurView } from "expo-blur";
 import AnimationPlayer from "../Components/AnimationPlayer";
 
-import { Assets, Animations } from "../assets/Assets";
+import { Animations } from "../assets/Assets";
 import { DataContext } from "../Utils/DataProvider";
 import { useIsFocused } from "@react-navigation/native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
@@ -111,15 +110,6 @@ const IdeaScreen = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.banner}>
-        <ImageBackground
-          source={Assets.banner}
-          resizeMode="cover"
-          style={styles.banner}
-        />
-        <Heading style={styles.bannerText}>{person.name}'s Gift List</Heading>
-      </View>
-
       <ModalImage
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
