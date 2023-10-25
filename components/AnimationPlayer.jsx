@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { View } from "react-native";
+
 import LottieView from "lottie-react-native";
 
 export default function AnimationPlayer({

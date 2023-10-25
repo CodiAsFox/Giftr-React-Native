@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
-import {
-  TouchableOpacity,
-  SafeAreaView,
-  StyleSheet,
-  Alert as AlertBox,
-} from "react-native";
+import { SafeAreaView, StyleSheet } from "react-native";
+
+import { MediaButtons } from "../../Components/ImageHandler";
 import {
   Box,
   Input,
@@ -12,151 +9,125 @@ import {
   Text,
   Heading,
   ScrollView,
-  Alert,
+  InputField,
   VStack,
   Image,
-  ButtonGroup,
-  ThreeDotsIcon,
-  ButtonIcon,
   ButtonText,
+  FormControl,
+  FormControlLabel,
+  FormControlLabelText,
   KeyboardAvoidingView,
-  HStack,
 } from "@gluestack-ui/themed";
-import { Camera } from "expo-camera";
+
 import { DataContext } from "../../Utils/DataProvider";
-import * as FileSystem from "expo-file-system";
-import * as ImagePicker from "expo-image-picker";
+import { useIsFocused } from "@react-navigation/native";
+import ErrorMessage from "../../Components/ErrorMessage";
 
 const AddIdeaScreen = ({ route, navigation }) => {
-  const [hasCameraPermission, setHasCameraPermission] = useState(null);
-  const [text, setText] = useState("");
-  const [image, setImage] = useState(null);
-  const [camera, setCamera] = useState(null);
+  const [giftIdea, setGiftIdea] = useState("");
+  const [usrImage, setUsrImage] = useState(null);
   const [error, setError] = useState(false);
-
   const { personId } = route.params;
-  const { addIdea } = useContext(DataContext);
+  const { addIdea, getPerson } = useContext(DataContext);
+  const isFocused = useIsFocused();
+  const [person, setPerson] = useState([]);
 
   useEffect(() => {
-    requestCameraPermission();
-  }, []);
+    navigation.setOptions({
+      title: `New gift idea`,
+    });
+  }, [navigation]);
 
-  const requestCameraPermission = async () => {
-    const { status } = await Camera.requestCameraPermissionsAsync();
-    setHasCameraPermission(status === "granted");
-  };
+  useEffect(() => {
+    if (isFocused) {
+      setPerson(getPerson(personId));
+    }
+  }, [isFocused]);
 
   const handleSave = async () => {
-    if (!text || !image) {
+    if (!giftIdea || !usrImage) {
       setError(true);
       return;
     }
 
     const newIdea = {
       id: "",
-      text,
-      img: image.uri,
-      width: image.width,
-      height: image.height,
+      giftIdea,
+      img: usrImage.uri,
+      width: usrImage.width,
+      height: usrImage.height,
     };
 
     await addIdea(personId, newIdea);
     navigation.goBack();
   };
 
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.cancelled) {
-      const newUri = `${FileSystem.documentDirectory}${result.uri
-        .split("/")
-        .pop()}`;
-      await FileSystem.moveAsync({ from: result.uri, to: newUri });
-      setImage({ uri: newUri, width: result.width, height: result.height });
-    }
-  };
-
-  const captureImage = async () => {
-    console.log(image);
-
-    if (image) {
-      setImage(null);
-      return;
-    }
-    if (!camera) return;
-
-    const photo = await camera.takePictureAsync();
-    const newUri = `${FileSystem.documentDirectory}${photo.uri
-      .split("/")
-      .pop()}`;
-    await FileSystem.moveAsync({ from: photo.uri, to: newUri });
-
-    console.log(newUri);
-    setImage({ uri: newUri, width: photo.width, height: photo.height });
-  };
-
   return (
     <SafeAreaView>
       <KeyboardAvoidingView behavior="padding">
-        {error && (
-          <Alert>
-            <Text>The idea name and photo fields are required.</Text>
-          </Alert>
-        )}
-        <Box>
-          <ScrollView>
-            <VStack>
-              <Text>Idea</Text>
-              <Input
-                value={text}
-                onChangeText={setText}
-                placeholder="Awesome shoes"
-              />
-              {image ? (
-                <Image
-                  source={{ uri: image.uri }}
-                  alt="Idea image"
-                  style={{ width: "100%", height: 450, resizeMode: "contain" }}
-                />
-              ) : (
-                <Camera
-                  ref={(ref) => setCamera(ref)}
-                  style={{ width: "100%", height: 400, resizeMode: "contain" }}
-                />
-              )}
+        <ScrollView>
+          <Box style={styles.body} justifyContent="center">
+            <Heading>Add gift for {person.name}</Heading>
+            <VStack space="lg" reversed={false}>
+              <FormControl isRequired={true}>
+                <VStack space="lg" reversed={false}>
+                  <FormControlLabel mb="$1">
+                    <FormControlLabelText>Idea name</FormControlLabelText>
+                  </FormControlLabel>
+                  <Input variant="outline" style={styles.input}>
+                    <InputField
+                      type="text"
+                      value={giftIdea}
+                      onChangeText={setGiftIdea}
+                      placeholder="Jetpack"
+                    />
+                  </Input>
+                  <FormControlLabel>
+                    <FormControlLabelText>
+                      {usrImage ? "Replace Image" : "Add Image"}
+                    </FormControlLabelText>
+                  </FormControlLabel>
+                  <MediaButtons setUsrImage={setUsrImage} />
 
-              <Heading>{image ? "Replace Image" : "Add Image"}</Heading>
-              <HStack space="md" justifyContent="space-between">
-                <Button
-                  variant="solid"
-                  size="lg"
-                  action="primary"
-                  onPress={captureImage}
-                >
-                  <ButtonText>
-                    {image ? "From Camera" : "Take Photo"}
-                  </ButtonText>
-                </Button>
-                <Button
-                  variant="solid"
-                  size="lg"
-                  action="secondary"
-                  onPress={pickImage}
-                >
-                  <ButtonText>Gallery</ButtonText>
-                </Button>
-              </HStack>
+                  <VStack
+                    backgroundColor="$teal900"
+                    w="100%"
+                    h={420}
+                    justifyContent="center"
+                    alignItems="center"
+                    borderRadius={10}
+                  >
+                    {usrImage ? (
+                      <Image
+                        source={{ uri: usrImage.uri }}
+                        alt="Idea image"
+                        role="img"
+                        w="100%"
+                        h={420}
+                        style={{
+                          resizeMode: "contain",
+                        }}
+                      />
+                    ) : (
+                      <Text>No image selected</Text>
+                    )}
+                  </VStack>
+                </VStack>
+              </FormControl>
             </VStack>
-          </ScrollView>
-          <Button onPress={handleSave}>
-            <Text>Add Idea</Text>
-          </Button>
-        </Box>
+            {error && (
+              <Box pt={15} pb={10}>
+                <ErrorMessage
+                  type="error"
+                  message="The idea name and photo fields are required."
+                />
+              </Box>
+            )}
+            <Button mt={10} action="positive" onPress={handleSave}>
+              <ButtonText>Add gift</ButtonText>
+            </Button>
+          </Box>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -165,6 +136,14 @@ const AddIdeaScreen = ({ route, navigation }) => {
 export default AddIdeaScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 50 },
-  body: { paddingTop: 15, paddingHorizontal: 25 },
+  input: {
+    borderWidth: 1,
+    marginBottom: 20,
+    padding: 10,
+  },
+
+  body: {
+    paddingTop: 15,
+    paddingHorizontal: 25,
+  },
 });
