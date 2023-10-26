@@ -11,6 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#333333"
     },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -37,7 +40,6 @@
       ]
     },
     "web": {
-      "bundler": "metro",
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
@@ -54,6 +56,7 @@
           "cameraPermission": "The app accesses your camera to let you share photos with your friends."
         }
       ]
-    ]
+    ],
+    "scheme": "giftr"
   }
 }

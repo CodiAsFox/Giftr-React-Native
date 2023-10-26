@@ -1,61 +1,40 @@
-import React, { useState, useContext, useEffect } from "react";
-import { SafeAreaView, StyleSheet } from "react-native";
+import React, {useState, useContext, useEffect} from 'react';
 
-import { AntDesign } from "@expo/vector-icons";
+import {AntDesign} from '@expo/vector-icons';
+
 import {
-  Box,
-  Input,
-  Button,
-  ButtonText,
-  Text,
+  SafeAreaView,
+  View,
+  StyleSheet,
   ScrollView,
-  InputField,
-  HStack,
-  VStack,
-  Avatar,
-  AvatarImage,
-  FormControl,
-  FormControlLabel,
-  FormControlLabelText,
   KeyboardAvoidingView,
-} from "@gluestack-ui/themed";
-import { MediaButtons } from "../../Components/ImageHandler";
-import DatePicker from "react-native-modern-datepicker";
-import { DataContext } from "../../Utils/DataProvider";
+} from 'react-native';
+import {DataContext} from '../../Utils/DataProvider';
 
-import ErrorMessage from "../../Components/ErrorMessage";
+import {ThemeContext} from '../../Utils/ThemeProvider';
 
-const AddPersonScreen = ({ navigation }) => {
-  const [name, setName] = useState("");
-  const [dob, setDob] = useState("");
-  const { addPerson } = useContext(DataContext);
+import {
+  Divider,
+  Icon,
+  Layout,
+  Popover,
+  Text,
+  Input,
+  TopNavigation,
+  Button,
+  Spinner,
+} from '@ui-kitten/components';
+
+import DatePicker from 'react-native-modern-datepicker';
+import BackButton from '../../Components/BackButton';
+// import ErrorMessage from '../../Components/ErrorMessage';
+
+const AddPersonScreen1 = ({navigation}) => {
+  const [name, setName] = useState('');
+  const [dob, setDob] = useState('');
+  const {addPerson} = useContext(DataContext);
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [error, setError] = useState(false);
-
-  useEffect(() => {
-    navigation.setOptions({
-      title: "Add Person",
-    });
-  }, [navigation]);
-
-  const handleSave = () => {
-    if (name && dob) {
-      const newPerson = {
-        id: "",
-        name,
-        dob,
-        profilePhoto: profilePhoto ? profilePhoto : undefined,
-        ideas: [],
-      };
-
-      addPerson(newPerson);
-      navigation.goBack();
-    } else {
-      setError(true);
-    }
-  };
-
-  const today = new Date().toISOString().split("T")[0];
 
   return (
     <SafeAreaView>
@@ -79,12 +58,12 @@ const AddPersonScreen = ({ navigation }) => {
                     <Avatar bgColor="$amber600" size="xl" borderRadius="$full">
                       <AntDesign name="user" size={32} color="white" />
                       {profilePhoto && (
-                        <AvatarImage source={{ uri: profilePhoto.uri }} />
+                        <AvatarImage source={{uri: profilePhoto.uri}} />
                       )}
                     </Avatar>
                     <VStack space="md" flex={1}>
                       <Text>
-                        {profilePhoto ? "Change photo" : "Add a photo"}
+                        {profilePhoto ? 'Change photo' : 'Add a photo'}
                       </Text>
                       <MediaButtons setUsrImage={setProfilePhoto} />
                     </VStack>
@@ -104,12 +83,6 @@ const AddPersonScreen = ({ navigation }) => {
                   <FormControlLabel mb="$1">
                     <FormControlLabelText>Date of Birth</FormControlLabelText>
                   </FormControlLabel>
-                  <DatePicker
-                    onDateChange={setDob}
-                    value={dob}
-                    mode="calendar"
-                    maximumDate={today}
-                  />
                 </VStack>
               </FormControl>
             </VStack>
@@ -131,6 +104,107 @@ const AddPersonScreen = ({ navigation }) => {
   );
 };
 
+const AddPersonScreen = ({navigation}) => {
+  const [name, setName] = useState('');
+  const [dob, setDob] = useState('');
+  const {addPerson} = useContext(DataContext);
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [error, setError] = useState(false);
+  const today = new Date().toISOString().split('T')[0];
+  const [visible, setVisible] = React.useState(false);
+
+  const handleSave = () => {
+    if (name && dob) {
+      const newPerson = {
+        id: '',
+        name,
+        dob,
+        profilePhoto: profilePhoto ? profilePhoto : undefined,
+        ideas: [],
+      };
+
+      addPerson(newPerson);
+      navigation.goBack();
+    } else {
+      setVisible(true);
+    }
+  };
+
+  const SavePerson = () => {
+    const personBtn = () => (
+      <Button
+        appearance="ghost"
+        size="medium"
+        status="danger"
+        onPress={handleSave}
+      >
+        Add person
+      </Button>
+    );
+
+    return (
+      <Popover
+        visible={visible}
+        anchor={personBtn}
+        fullWidth={true}
+        onBackdropPress={() => setVisible(false)}
+      >
+        <Layout style={styles.content}>
+          <Text>Person's name and date of birth are required.</Text>
+        </Layout>
+      </Popover>
+    );
+  };
+
+  return (
+    <Layout style={{flex: 1}} level="4">
+      <TopNavigation
+        alignment="center"
+        title="Add new person"
+        accessoryLeft={() => <BackButton />}
+        accessoryRight={() => <SavePerson />}
+      />
+      <SafeAreaView>
+        <KeyboardAvoidingView behavior="padding">
+          <ScrollView>
+            <Layout
+              level="1"
+              style={{
+                // flex: 1,
+                paddingVertical: 20,
+                paddingHorizontal: 30,
+              }}
+            >
+              <Input
+                value={name}
+                label="Person's name"
+                placeholder="John Doe"
+                onChangeText={(nextValue) => setName(nextValue)}
+              />
+            </Layout>
+            <Layout
+              level="2"
+              style={{
+                // flex: 1,
+                paddingVertical: 20,
+                paddingHorizontal: 30,
+              }}
+            >
+              <Text category="label">Person's date of birth</Text>
+              <DatePicker
+                onDateChange={setDob}
+                value={dob}
+                mode="calendar"
+                maximumDate={today}
+              />
+            </Layout>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </Layout>
+  );
+};
+
 export default AddPersonScreen;
 
 const styles = StyleSheet.create({
@@ -142,5 +216,11 @@ const styles = StyleSheet.create({
   body: {
     paddingTop: 15,
     paddingHorizontal: 25,
+  },
+  title: {
+    textAlign: 'center',
+    // alignContent: 'center',
+    // justifyContent: 'center',
+    paddingVertical: 20,
   },
 });

@@ -1,3 +1,5 @@
+import React from 'react';
+
 /***
  * Oh, Hi Steve, is a surprise seeing you here.
  *
@@ -10,92 +12,61 @@
  *
  * Tay.
  * ***/
+import {StyleSheet, View} from 'react-native';
+import {
+  ApplicationProvider,
+  Button,
+  Icon,
+  IconRegistry,
+  Layout,
+  Text,
+} from '@ui-kitten/components';
+import {StatusBar} from 'expo-status-bar';
+import {EvaIconsPack} from '@ui-kitten/eva-icons';
+import * as eva from '@eva-design/eva';
+import AppNavigation from './Components/AppNavigation';
+import {DataProvider} from './Utils/DataProvider';
+import {ThemeContext} from './Utils/ThemeProvider';
 
-import { GluestackUIProvider } from "@gluestack-ui/themed";
-import React from "react";
-import { Platform } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { DataProvider } from "./Utils/DataProvider";
-import PeopleScreen from "./Screens/PeopleScreen";
-import { config } from "@gluestack-ui/config";
-import IdeaScreen from "./Screens/IdeaScreen";
-import AddIdeaScreen from "./Screens/Forms/AddIdeaScreen";
+export default App = () => {
+  const [theme, setTheme] = React.useState('dark');
 
-import BackButton from "./Components/BackButton";
-import AddPersonScreen from "./Screens/Forms/AddPersonScreen";
-
-const Stack = createNativeStackNavigator();
-
-function AppNavigation() {
-  const os = Platform.OS;
-
-  const options = {
-    ios: {},
-    android: {
-      presentation: "card",
-    },
+  const toggleTheme = () => {
+    const nextTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(nextTheme);
   };
-
-  const navBar = {
-    ios: {
-      headerRight: () => <></>,
-      headerLeft: () => <BackButton />,
-    },
-    android: {
-      headerRight: () => <BackButton />,
-      headerLeft: () => <></>,
-    },
-  };
-
-  const screenProps = options[os];
-  const navProps = navBar[os];
-
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="PeopleScreen"
-          component={PeopleScreen}
-          options={() => ({ ...screenProps })}
-        />
-        <Stack.Screen
-          name="AddPersonScreen"
-          component={AddPersonScreen}
-          options={() => ({
-            ...screenProps,
-            presentation: os == "ios" ? "modal" : "card",
-            ...navProps,
-          })}
-        />
-        <Stack.Screen
-          name="IdeaScreen"
-          component={IdeaScreen}
-          options={screenProps}
-        />
-        <Stack.Screen
-          name="AddIdeaScreen"
-          component={AddIdeaScreen}
-          options={() => ({
-            ...screenProps,
-            presentation: os == "ios" ? "modal" : "card",
-            ...navProps,
-          })}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <>
+      <IconRegistry icons={EvaIconsPack} />
+      <StatusBar style={theme == 'dark' ? 'inverted' : 'dark'} />
+      <ThemeContext.Provider value={{theme, toggleTheme}}>
+        <ApplicationProvider {...eva} theme={eva[theme]}>
+          <Layout style={styles.container}>
+            <DataProvider>
+              <AppNavigation />
+            </DataProvider>
+          </Layout>
+        </ApplicationProvider>
+      </ThemeContext.Provider>
+    </>
   );
-}
+};
 
-export default function App() {
-  return (
-    <GluestackUIProvider config={config}>
-      <DataProvider>
-        <SafeAreaProvider>
-          <AppNavigation />
-        </SafeAreaProvider>
-      </DataProvider>
-    </GluestackUIProvider>
-  );
-}
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    //  justifyContent: 'center',
+    //  alignItems: 'center',
+  },
+  statusBar: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  text: {
+    textAlign: 'center',
+  },
+  likeButton: {
+    marginVertical: 16,
+  },
+});
