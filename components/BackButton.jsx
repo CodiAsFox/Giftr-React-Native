@@ -1,92 +1,37 @@
-import React from "react";
-import { Alert as AlertBox } from "react-native";
+import React from 'react';
+import {Alert} from 'react-native';
 
-import { AntDesign } from "@expo/vector-icons";
-import {
-  Box,
-  Input,
-  Button,
-  ButtonText,
-  Text,
-  ScrollView,
-  InputField,
-  Alert,
-  AlertIcon,
-  AlertText,
-  InfoIcon,
-  HStack,
-  VStack,
-  Avatar,
-  AvatarImage,
-  FormControl,
-  FormControlLabel,
-  FormControlLabelText,
-  Actionsheet,
-  ActionsheetItem,
-  ActionsheetItemText,
-  ActionsheetBackdrop,
-  ActionsheetContent,
-  ActionsheetDragIndicatorWrapper,
-  ActionsheetDragIndicator,
-  KeyboardAvoidingView,
-  Menu,
-  MenuItem,
-  MenuItemLabel,
-  Icon,
-  GlobeIcon,
-  PuzzleIcon,
-  PaintBucket,
-  SettingsIcon,
-  AddIcon,
-  CloseIcon,
-  CheckIcon,
-  CameraIcon,
-  CameraIconOutline,
-  CameraIconSolid,
-  ImageIcon,
-  ImageIconOutline,
-  AlertDialog,
-  AlertDialogBackdrop,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogBody,
-  AlertDialogFooter,
-  AlertDialogCloseButton,
-  Center,
-  Heading,
-  ButtonGroup,
-} from "@gluestack-ui/themed";
-import { useNavigation } from "@react-navigation/native";
+import {Button, Icon} from '@ui-kitten/components';
+import {useNavigation} from '@react-navigation/native';
 
 export default function BackButton() {
   const nav = useNavigation();
+  const CloseIcon = (props) => <Icon {...props} name="arrow-back-outline" />;
   return (
     <Button
-      style={{ zIndex: 999 }}
-      size="md"
-      variant="link"
-      action="secondary"
+      appearance="ghost"
+      size="large"
+      status="danger"
+      accessoryLeft={CloseIcon}
       onPress={() => {
-        AlertBox.alert(
-          "Discard changes?",
-          "Any unsaved changes will be discarded. Are you sure you want to exit?",
+        Alert.alert(
+          'Discard changes?',
+          'Any unsaved changes will be discarded. Are you sure you want to exit?',
           [
             {
-              text: "Exit",
+              text: 'Exit',
               onPress: () => {
                 nav.goBack();
               },
-              style: "destructive",
+              style: 'destructive',
             },
             {
-              text: "Keep Editing",
-              style: "confirm",
+              text: 'Keep Editing',
+              style: 'confirm',
             },
-          ]
+          ],
         );
       }}
-    >
-      <ButtonText show>Cancel</ButtonText>
-    </Button>
+    />
   );
 }

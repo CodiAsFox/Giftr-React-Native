@@ -1,47 +1,42 @@
-import React, { useState, useContext, useEffect } from "react";
-import { SafeAreaView, StyleSheet } from "react-native";
+import React, {useState, useContext} from 'react';
 
-import { AntDesign } from "@expo/vector-icons";
 import {
-  Box,
-  Input,
-  Button,
-  ButtonText,
-  Text,
+  SafeAreaView,
+  StyleSheet,
   ScrollView,
-  InputField,
-  HStack,
-  VStack,
-  Avatar,
-  AvatarImage,
-  FormControl,
-  FormControlLabel,
-  FormControlLabelText,
   KeyboardAvoidingView,
-} from "@gluestack-ui/themed";
-import { MediaButtons } from "../../Components/ImageHandler";
-import DatePicker from "react-native-modern-datepicker";
-import { DataContext } from "../../Utils/DataProvider";
+} from 'react-native';
+import {DataContext} from '../../Utils/DataProvider';
+import {Userpic} from 'react-native-userpic';
+import {MediaButtons} from '../../Components/ImageHandler';
 
-import ErrorMessage from "../../Components/ErrorMessage";
+import {
+  Layout,
+  Avatar,
+  Text,
+  Input,
+  TopNavigation,
+  useTheme,
+  Button,
+} from '@ui-kitten/components';
 
-const AddPersonScreen = ({ navigation }) => {
-  const [name, setName] = useState("");
-  const [dob, setDob] = useState("");
-  const { addPerson } = useContext(DataContext);
+import DatePicker from 'react-native-modern-datepicker';
+import BackButton from '../../Components/BackButton';
+
+const AddPersonScreen = ({navigation}) => {
+  const [name, setName] = useState('');
+  const [dob, setDob] = useState('');
+  const {addPerson} = useContext(DataContext);
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [error, setError] = useState(false);
+  const today = new Date().toISOString().split('T')[0];
 
-  useEffect(() => {
-    navigation.setOptions({
-      title: "Add Person",
-    });
-  }, [navigation]);
+  const uiTheme = useTheme();
 
   const handleSave = () => {
     if (name && dob) {
       const newPerson = {
-        id: "",
+        id: '',
         name,
         dob,
         profilePhoto: profilePhoto ? profilePhoto : undefined,
@@ -49,85 +44,139 @@ const AddPersonScreen = ({ navigation }) => {
       };
 
       addPerson(newPerson);
-      navigation.goBack();
+      navigation.navigate('PeopleScreen');
     } else {
       setError(true);
     }
   };
 
-  const today = new Date().toISOString().split("T")[0];
+  const datePickerOptions = {
+    backgroundColor: uiTheme['background-basic-color-3'],
+    textHeaderColor: uiTheme['color-danger-hover'],
+    textDefaultColor: uiTheme['text-hint-color'],
+    selectedTextColor: uiTheme['color-basic-active'],
+    mainColor: uiTheme['color-danger-default-border'],
+    textSecondaryColor: uiTheme['color-basic-default-border'],
+    borderColor: 'rgba(122, 146, 165, 0.1)',
+  };
 
   return (
-    <SafeAreaView>
-      <KeyboardAvoidingView behavior="padding">
-        <ScrollView>
-          <VStack
-            style={styles.body}
-            justifyContent="space-between"
-            alignContent="space-between"
+    <Layout style={{flex: 1}} level="4">
+      <TopNavigation
+        alignment="center"
+        title="Add new person"
+        accessoryLeft={() => <BackButton />}
+        accessoryRight={() => (
+          <Button
+            appearance="ghost"
+            size="medium"
+            status="danger"
+            onPress={handleSave}
           >
-            <VStack space="lg" reversed={false}>
-              <FormControl isRequired={true}>
-                <VStack space="lg" reversed={false}>
-                  <FormControlLabel isRequired={false}>
-                    <FormControlLabelText>
-                      Person's picture
-                    </FormControlLabelText>
-                  </FormControlLabel>
-
-                  <HStack space="lg" alignItems="center">
-                    <Avatar bgColor="$amber600" size="xl" borderRadius="$full">
-                      <AntDesign name="user" size={32} color="white" />
-                      {profilePhoto && (
-                        <AvatarImage source={{ uri: profilePhoto.uri }} />
-                      )}
-                    </Avatar>
-                    <VStack space="md" flex={1}>
-                      <Text>
-                        {profilePhoto ? "Change photo" : "Add a photo"}
-                      </Text>
-                      <MediaButtons setUsrImage={setProfilePhoto} />
-                    </VStack>
-                  </HStack>
-
-                  <FormControlLabel mb="$1">
-                    <FormControlLabelText>Person's name</FormControlLabelText>
-                  </FormControlLabel>
-                  <Input variant="outline" style={styles.input}>
-                    <InputField
-                      type="text"
-                      value={name}
-                      onChangeText={setName}
-                      placeholder="John Doe"
-                    />
-                  </Input>
-                  <FormControlLabel mb="$1">
-                    <FormControlLabelText>Date of Birth</FormControlLabelText>
-                  </FormControlLabel>
-                  <DatePicker
-                    onDateChange={setDob}
-                    value={dob}
-                    mode="calendar"
-                    maximumDate={today}
-                  />
-                </VStack>
-              </FormControl>
-            </VStack>
+            Add person
+          </Button>
+        )}
+      />
+      <SafeAreaView>
+        <KeyboardAvoidingView behavior="padding">
+          <ScrollView>
             {error && (
-              <Box pt={15} pb={10}>
-                <ErrorMessage
-                  type="error"
-                  message="The name and date of birth fields are required."
-                />
-              </Box>
+              <Text
+                style={{
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  paddingVertical: 20,
+                }}
+                status="danger"
+                appearance="alternative"
+              >
+                The name and date of birth fields are required.
+              </Text>
             )}
-            <Button mt={10} action="positive" onPress={handleSave}>
-              <ButtonText>Add person</ButtonText>
-            </Button>
-          </VStack>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            <Layout
+              style={{
+                flexDirection: 'row',
+                paddingHorizontal: 35,
+                justifyContent: 'space-between',
+                alignContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Layout>
+                {profilePhoto ? (
+                  <Avatar
+                    size="large"
+                    style={styles.itemImage}
+                    source={{uri: profilePhoto.uri}}
+                  />
+                ) : (
+                  <Avatar
+                    size="large"
+                    style={styles.itemImage}
+                    ImageComponent={() => (
+                      <Userpic name="User Photo" colorize={true} />
+                    )}
+                  />
+                )}
+              </Layout>
+
+              <Layout
+                style={{
+                  flexDirection: 'row',
+                  flex: 1,
+                  justifyContent: 'space-between',
+                  textAlign: 'center',
+                  alignContent: 'center',
+                  alignItems: 'center',
+                  gap: 15,
+                }}
+              >
+                <Text style={{textAlign: 'center', flex: 1}}>
+                  {profilePhoto ? 'Change photo' : 'Add a photo'}
+                </Text>
+                <MediaButtons setUsrImage={setProfilePhoto} />
+              </Layout>
+            </Layout>
+            <Layout
+              level="1"
+              style={{
+                paddingVertical: 20,
+                paddingHorizontal: 30,
+              }}
+            >
+              <Input
+                value={name}
+                label="Person's name"
+                placeholder="John Doe"
+                onChangeText={(nextValue) => setName(nextValue)}
+              />
+            </Layout>
+            <Layout
+              level="2"
+              style={{
+                paddingVertical: 20,
+                paddingHorizontal: 30,
+              }}
+            >
+              <Text
+                style={{paddingBottom: 10}}
+                appearance="hint"
+                category="label"
+              >
+                Person's date of birth
+              </Text>
+              <DatePicker
+                onDateChange={setDob}
+                value={dob}
+                mode="calendar"
+                maximumDate={today}
+                options={datePickerOptions}
+              />
+            </Layout>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </Layout>
   );
 };
 
@@ -139,8 +188,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 10,
   },
-  body: {
-    paddingTop: 15,
-    paddingHorizontal: 25,
+
+  itemImage: {
+    width: 100,
+    height: 100,
+    resizeMode: 'cover',
   },
 });
