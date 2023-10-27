@@ -120,54 +120,6 @@ function PersonList({sortedPeople, navigation}) {
 export default PersonList;
 
 const styles = StyleSheet.create({
-  row: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-  },
-  container: {
-    // flex: 1,
-  },
-  swipeable: {alignItems: 'center', flex: 1, width: '100%'},
-  emptyBox: {
-    alignItems: 'center',
-    marginTop: -65,
-  },
-  emptyBody: {
-    justifyContent: 'center',
-    height: '90%',
-  },
-  banner: {
-    left: 0,
-    width: '100%',
-    height: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bannerText: {
-    color: '#fff',
-    fontSize: 30,
-    position: 'absolute',
-  },
-  button: {
-    marginTop: 20,
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  spinnerContainer: {
-    flexDirection: 'row',
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignContent: 'center',
-  },
-  controlContainer: {
-    borderRadius: 4,
-    padding: 12,
-    backgroundColor: '#3366FF',
-  },
   logo: {
     marginHorizontal: 16,
   },

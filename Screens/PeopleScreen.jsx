@@ -1,12 +1,12 @@
 import React, {useContext, useEffect, useState} from 'react';
 
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import {SafeAreaView, View, StatusBar, StyleSheet} from 'react-native';
+import {SafeAreaView, View, StyleSheet} from 'react-native';
 import {DataContext} from '../Utils/DataProvider';
 
 import {ThemeContext} from '../Utils/ThemeProvider';
 import AnimationPlayer from '../Components/AnimationPlayer';
-import PersonList from '../Components/Person/ListComponent';
+import PersonList from '../Components/Lists/PeopleList';
 import {
   Divider,
   Icon,
@@ -26,7 +26,7 @@ function EmptyPeople({navigation}) {
         <Text category="s1">Add a person to get started.</Text>
         <View>
           <AnimationPlayer
-            animation={Animations.sad}
+            animation={Animations.welcome}
             autoPlay={true}
             loop={false}
           />
@@ -45,8 +45,8 @@ function EmptyPeople({navigation}) {
 }
 
 function HomeHeader({navigation}) {
-  const {toggleTheme} = React.useContext(ThemeContext);
-  const {theme} = React.useContext(ThemeContext);
+  const {toggleTheme} = useContext(ThemeContext);
+  const {theme} = useContext(ThemeContext);
   const os = Platform.OS;
 
   const SwitchTheme = () => {
@@ -76,7 +76,6 @@ function HomeHeader({navigation}) {
 
   const renderTitle = (props) => (
     <View style={styles.titleContainer}>
-      {/* <Avatar style={styles.logo} source={require('../assets/user.png')} /> */}
       <Text {...props}>Home</Text>
     </View>
   );
@@ -94,8 +93,6 @@ function HomeHeader({navigation}) {
 function PeopleScreen({navigation}) {
   const {people, isLoading} = useContext(DataContext);
   const [sortedPeople, setSortedPeople] = useState([]);
-
-  const {theme} = React.useContext(ThemeContext);
 
   useEffect(() => {
     const stPeople = people.sort((a, b) => {
@@ -121,7 +118,7 @@ function PeopleScreen({navigation}) {
                   <Spinner status="control" />
                 </View>
               </Layout>
-            ) : sortedPeople.length > 1 ? (
+            ) : sortedPeople.length >= 1 ? (
               <PersonList sortedPeople={sortedPeople} navigation={navigation} />
             ) : (
               <EmptyPeople navigation={navigation} />
@@ -135,20 +132,6 @@ function PeopleScreen({navigation}) {
 export default PeopleScreen;
 
 const styles = StyleSheet.create({
-  ststusBar: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  row: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-  },
-  container: {
-    // flex: 1,
-  },
-  swipeable: {alignItems: 'center', flex: 1, width: '100%'},
   emptyBox: {
     alignItems: 'center',
     marginTop: -65,
@@ -157,18 +140,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: '90%',
   },
-  banner: {
-    left: 0,
-    width: '100%',
-    height: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bannerText: {
-    color: '#fff',
-    fontSize: 30,
-    position: 'absolute',
-  },
+
   button: {
     marginTop: 20,
   },
@@ -187,26 +159,5 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     padding: 12,
     backgroundColor: '#3366FF',
-  },
-  logo: {
-    marginHorizontal: 16,
-  },
-  itemImage: {
-    width: 40,
-    height: 40,
-    resizeMode: 'cover',
-  },
-  name: {
-    fontSize: 21,
-  },
-  dob: {
-    width: 15,
-    height: 15,
-    top: 2,
-    marginRight: 2,
-  },
-  dobText: {
-    marginTop: 5,
-    fontSize: 13,
   },
 });

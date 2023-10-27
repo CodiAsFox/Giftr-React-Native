@@ -1,6 +1,17 @@
 import React, {createContext, useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {v4 as uuidv4} from 'uuid';
+import * as Crypto from 'expo-crypto';
+
+const generateID = async () => {
+  const currentTime = new Date().getTime().toString();
+  const randomValue = Math.random().toString();
+  const uniqueString = currentTime + randomValue;
+  const hash = await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    uniqueString,
+  );
+  return hash;
+};
 
 const setData = async (key, value) => {
   try {
@@ -47,14 +58,19 @@ const DataProvider = ({children}) => {
   const getData = getData;
 
   const addPerson = async (person) => {
-    const newPerson = {...person, id: uuidv4(), ideas: []};
+    setIsLoading(true);
+    const ID = await generateID();
+    const newPerson = {...person, id: ID, ideas: []};
     const newPeople = [...people, newPerson];
     setPeople(newPeople);
     await AsyncStorage.setItem('people', JSON.stringify(newPeople));
+    setIsLoading(false);
   };
 
   const addIdea = async (personId, idea) => {
-    const newIdea = {...idea, id: uuidv4()};
+    setIsLoading(true);
+    const ID = await generateID();
+    const newIdea = {...idea, id: ID};
     const newPeople = people.map((person) =>
       person.id === personId
         ? {...person, ideas: [...person.ideas, newIdea]}
@@ -62,69 +78,58 @@ const DataProvider = ({children}) => {
     );
     setPeople(newPeople);
     await AsyncStorage.setItem('people', JSON.stringify(newPeople));
+    setIsLoading(false);
   };
 
   const deleteIdea = async (personId, ideaId) => {
-    let imageUriToDelete = null;
+    try {
+      setIsLoading(true);
+      let imageUriToDelete = null;
 
-    const newPeople = people.map((person) => {
-      if (person.id === personId) {
-        const ideaToDelete = person.ideas.find((idea) => idea.id === ideaId);
-        if (ideaToDelete && ideaToDelete.img) {
-          imageUriToDelete = ideaToDelete.img;
+      const newPeople = people.map((person) => {
+        if (person.id === personId) {
+          const ideaToDelete = person.ideas.find((idea) => idea.id === ideaId);
+          if (ideaToDelete && ideaToDelete.img) {
+            imageUriToDelete = ideaToDelete.img;
+          }
+          return {
+            ...person,
+            ideas: person.ideas.filter((idea) => idea.id !== ideaId),
+          };
         }
+        return person;
+      });
+      setPeople(newPeople);
+      await AsyncStorage.setItem('people', JSON.stringify(newPeople));
+    } catch (error) {
+      console.error('Failed to delete idea:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        return {
-          ...person,
-          ideas: person.ideas.filter((idea) => idea.id !== ideaId),
-        };
-      }
-      return person;
-    });
-
-    setPeople(newPeople);
-    await AsyncStorage.setItem('people', JSON.stringify(newPeople));
-
-    if (imageUriToDelete) {
-      try {
-        await FileSystem.deleteAsync(imageUriToDelete, {idempotent: true});
-      } catch (error) {
-        console.error('Failed to delete image:', error);
-      }
+  const deletePerson = async (personId) => {
+    try {
+      setIsLoading(true);
+      const newPeople = people.filter((person) => person.id !== personId);
+      setPeople(newPeople);
+      await AsyncStorage.setItem('people', JSON.stringify(newPeople));
+    } catch (error) {
+      console.error('Failed to delete person:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const getPerson = (personId) => {
+    setIsLoading(false);
     return people.find((person) => person.id === personId);
   };
 
   const getIdeas = (personId) => {
+    setIsLoading(false);
     const person = people.find((p) => p.id === personId);
     return person ? person.ideas : [];
-  };
-
-  const deletePerson = async (personId) => {
-    const personToDelete = people.find((person) => person.id === personId);
-    const newPeople = people.filter((person) => person.id !== personId);
-    setPeople(newPeople);
-
-    try {
-      await AsyncStorage.setItem('people', JSON.stringify(newPeople));
-
-      if (personToDelete) {
-        for (const idea of personToDelete.ideas) {
-          if (idea.img) {
-            try {
-              await FileSystem.deleteAsync(idea.img, {idempotent: true});
-            } catch (error) {
-              console.error('Failed to delete image:', error);
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Failed to delete person:', error);
-    }
   };
 
   return (

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 /***
  * Oh, Hi Steve, is a surprise seeing you here.
@@ -12,15 +12,9 @@ import React from 'react';
  *
  * Tay.
  * ***/
-import {StyleSheet, View} from 'react-native';
-import {
-  ApplicationProvider,
-  Button,
-  Icon,
-  IconRegistry,
-  Layout,
-  Text,
-} from '@ui-kitten/components';
+
+import {StyleSheet} from 'react-native';
+import {ApplicationProvider, IconRegistry, Layout} from '@ui-kitten/components';
 import {StatusBar} from 'expo-status-bar';
 import {EvaIconsPack} from '@ui-kitten/eva-icons';
 import * as eva from '@eva-design/eva';
@@ -29,7 +23,7 @@ import {DataProvider} from './Utils/DataProvider';
 import {ThemeContext} from './Utils/ThemeProvider';
 
 export default App = () => {
-  const [theme, setTheme] = React.useState('dark');
+  const [theme, setTheme] = useState('dark');
 
   const toggleTheme = () => {
     const nextTheme = theme === 'light' ? 'dark' : 'light';
@@ -55,18 +49,5 @@ export default App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //  justifyContent: 'center',
-    //  alignItems: 'center',
-  },
-  statusBar: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    textAlign: 'center',
-  },
-  likeButton: {
-    marginVertical: 16,
   },
 });

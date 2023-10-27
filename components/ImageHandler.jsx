@@ -1,26 +1,18 @@
-import React, { useState, useEffect } from "react";
-import { Modal } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import ErrorMessage from "./ErrorMessage";
-import {
-  Box,
-  Button,
-  ButtonIcon,
-  View,
-  ButtonText,
-  HStack,
-} from "@gluestack-ui/themed";
+import React, {useState, useEffect} from 'react';
+import {Modal, View} from 'react-native';
 
-import { Camera } from "expo-camera";
-import * as FileSystem from "expo-file-system";
-import * as ImagePicker from "expo-image-picker";
+import {Icon, Layout, Text, Button} from '@ui-kitten/components';
+import {Camera, CameraType} from 'expo-camera';
+import * as FileSystem from 'expo-file-system';
+import * as ImagePicker from 'expo-image-picker';
 
-function CameraModal({ setUsrImage }) {
+function CameraModal({setUsrImage}) {
   const [showModal, setShowModal] = useState(false);
+  const [type, setType] = useState(CameraType.back);
   const [camera, setCamera] = useState(null);
   function toggleCameraType() {
     setType((current) =>
-      current === CameraType.back ? CameraType.front : CameraType.back
+      current === CameraType.back ? CameraType.front : CameraType.back,
     );
   }
 
@@ -29,79 +21,70 @@ function CameraModal({ setUsrImage }) {
 
     const photo = await camera.takePictureAsync();
     const photoUri = `${FileSystem.documentDirectory}${photo.uri
-      .split("/")
+      .split('/')
       .pop()}`;
-    await FileSystem.moveAsync({ from: photo.uri, to: photoUri }).then(() => {
-      setUsrImage({ uri: photoUri });
+    await FileSystem.moveAsync({from: photo.uri, to: photoUri}).then(() => {
+      setUsrImage({uri: photoUri});
     });
     setShowModal(false);
   };
 
+  const CameraIcon = (props) => <Icon {...props} name="camera-outline" />;
+
+  const SwitchIcon = (props) => <Icon {...props} name="refresh-outline" />;
+  const CloseIcon = (props) => <Icon {...props} name="close" />;
   return (
     <>
       <Button
-        variant="solid"
-        action="primary"
-        size="sm"
-        flex={1}
-        // style={{ width: "100%" }}
+        status="primary"
+        accessoryLeft={CameraIcon}
         onPress={() => setShowModal(true)}
-      >
-        <ButtonIcon as={Ionicons} name="camera" size={25} />
-      </Button>
+      />
       <Modal animationType="slide" transparent={false} visible={showModal}>
-        <View style={{ marginTop: 22 }}>
+        <View style={{marginTop: 22}}>
           <View>
             <Camera
+              type={type}
               ref={(ref) => setCamera(ref)}
-              style={{ width: "100%", height: "100%" }}
+              style={{width: '100%', height: '100%'}}
             />
             <Button
               style={{
+                flex: 1,
+                position: 'absolute',
                 top: 55,
                 left: 15,
               }}
-              size="sm"
-              variant="solid"
-              action="secondary"
-              justifyContent="center"
-              position="absolute"
-              zIndex={999}
+              status="danger"
+              accessoryLeft={CloseIcon}
               onPress={() => {
                 setShowModal(!showModal);
               }}
-            >
-              <ButtonIcon as={Ionicons} name="md-close-circle" />
-            </Button>
+            />
+
             <Button
               style={{
+                flex: 1,
+                position: 'absolute',
                 top: 55,
                 right: 15,
               }}
-              size="sm"
-              variant="solid"
-              action="secondary"
-              justifyContent="center"
-              position="absolute"
-              zIndex={999}
+              status="basic"
+              accessoryLeft={SwitchIcon}
               onPress={() => toggleCameraType}
-            >
-              <ButtonIcon as={Ionicons} name="camera-reverse-outline" />
-            </Button>
+            />
+
             <Button
               style={{
-                bottom: "10%",
-                right: "32%",
+                flex: 1,
+                position: 'absolute',
+                bottom: '10%',
+                right: '35%',
               }}
-              zIndex={999}
-              variant="solid"
-              position="absolute"
-              size="lg"
-              rounded="$full"
-              action="primary"
+              status="success"
               onPress={captureImage}
             >
-              <ButtonText>Take Photo</ButtonText>
+              Take Photo
             </Button>
           </View>
         </View>
@@ -110,7 +93,8 @@ function CameraModal({ setUsrImage }) {
   );
 }
 
-function ChosePicture({ setUsrImage }) {
+function ChosePicture({setUsrImage}) {
+  const GalleryIcon = (props) => <Icon {...props} name="image-outline" />;
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -122,29 +106,20 @@ function ChosePicture({ setUsrImage }) {
     if (!result.canceled) {
       const media = result.assets[0];
       const photoUri = `${FileSystem.documentDirectory}${media.uri
-        .split("/")
+        .split('/')
         .pop()}`;
-      await FileSystem.moveAsync({ from: media.uri, to: photoUri }).then(() => {
-        setUsrImage({ uri: photoUri });
+      await FileSystem.moveAsync({from: media.uri, to: photoUri}).then(() => {
+        setUsrImage({uri: photoUri});
       });
     }
   };
 
   return (
-    <Button
-      variant="solid"
-      size="sm"
-      action="secondary"
-      onPress={pickImage}
-      flex={1}
-      // style={{ width: auto }}
-    >
-      <ButtonIcon as={Ionicons} name="ios-albums" size={25} />
-    </Button>
+    <Button status="success" accessoryLeft={GalleryIcon} onPress={pickImage} />
   );
 }
 
-function MediaButtons({ setUsrImage, showCamera = true, showGallery = true }) {
+function MediaButtons({setUsrImage, showCamera = true, showGallery = true}) {
   const [hasCameraPermission, setHasCameraPermission] = useState(false);
   const [hasLibraryAccess, setHasLibraryAccess] = useState(false);
   const [enableCamera, setEnableCamera] = useState(false);
@@ -165,39 +140,59 @@ function MediaButtons({ setUsrImage, showCamera = true, showGallery = true }) {
   }, [hasCameraPermission, hasLibraryAccess]);
 
   const requestGalleryPemission = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    setHasLibraryAccess(status == "granted");
+    setHasLibraryAccess(status == 'granted');
   };
 
   const requestCameraPermission = async () => {
     if (hasCameraPermission) return;
-    const { status } = await Camera.requestCameraPermissionsAsync();
-    setHasCameraPermission(status == "granted");
+    const {status} = await Camera.requestCameraPermissionsAsync();
+    setHasCameraPermission(status == 'granted');
   };
 
   return (
-    <Box>
+    <View>
       {showCamera && !hasCameraPermission && (
-        <ErrorMessage
-          padding="md"
-          type="error"
-          message="The access to the gallery was denied. Go to your phone settings and allow Giftr access to the gallery."
-        />
+        <Text
+          style={{
+            fontWeight: 'bold',
+            textAlign: 'center',
+            paddingVertical: 20,
+          }}
+          status="danger"
+          appearance="alternative"
+        >
+          The access to the camera was denied. Go to your phone settings and
+          allow Giftr access to the camera.
+        </Text>
       )}
       {showGallery && !hasLibraryAccess && (
-        <ErrorMessage
-          padding="md"
-          type="error"
-          message="The access to the gallery was denied. Go to your phone settings and allow Giftr access to the gallery."
-        />
+        <Text
+          style={{
+            fontWeight: 'bold',
+            textAlign: 'center',
+            paddingVertical: 20,
+          }}
+          status="danger"
+          appearance="alternative"
+        >
+          The access to the gallery was denied. Go to your phone settings and
+          allow Giftr access to the gallery
+        </Text>
       )}
-      <HStack space="lg" pt="$4">
+      <Layout
+        style={{
+          flexDirection: 'row',
+          gap: 5,
+          justifyContent: 'space-around',
+        }}
+      >
         {enableCamera && <CameraModal setUsrImage={setUsrImage} />}
         {enableGallery && <ChosePicture setUsrImage={setUsrImage} />}
-      </HStack>
-    </Box>
+      </Layout>
+    </View>
   );
 }
 
-export { CameraModal, ChosePicture, MediaButtons };
+export {CameraModal, ChosePicture, MediaButtons};
